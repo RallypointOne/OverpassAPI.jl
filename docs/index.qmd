@@ -1,19 +1,19 @@
 ---
-title: "JuliaPackageTemplate.jl"
+title: "OverpassAPI.jl"
 engine: julia
 ---
 
-Welcome to the documentation for **JuliaPackageTemplate.jl**.
+Welcome to the documentation for **OverpassAPI.jl**.
 
 ## Overview
 
-JuliaPackageTemplate.jl is a Julia package that ...
+OverpassAPI.jl is a Julia interface to the [Overpass API](https://overpass-api.de/) for querying OpenStreetMap data.
 
 ## Installation
 
 ```julia
 using Pkg
-Pkg.add("JuliaPackageTemplate")
+Pkg.add("OverpassAPI")
 ```
 
 ## Quickstart

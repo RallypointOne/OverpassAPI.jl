@@ -1,6 +1,6 @@
-using JuliaPackageTemplate
+using OverpassAPI
 using Test
 
-@testset "JuliaPackageTemplate.jl" begin
-    @test JuliaPackageTemplate.greet() == "Hello from JuliaPackageTemplate!"
+@testset "OverpassAPI.jl" begin
+    @test OverpassAPI.greet() == "Hello from OverpassAPI!"
 end

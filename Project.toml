@@ -1,7 +1,7 @@
-name = "JuliaPackageTemplate"
-uuid = "7adf5606-a580-4ec5-b7a7-75603f58a1cf"
+name = "OverpassAPI"
+uuid = "78759bb8-e702-4122-98f4-c2c710342d47"
 version = "0.1.0"
-authors = ["author <author@email.com>"]
+authors = ["Josh Day <emailjoshday@gmail.com>"]
 
 [compat]
 julia = "1"

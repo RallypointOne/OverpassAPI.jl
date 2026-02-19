@@ -1,4 +1,4 @@
-module JuliaPackageTemplate
+module OverpassAPI
 
 export greet, Config, transform, DEFAULT_GREETING
 
@@ -25,13 +25,13 @@ Return a greeting string. If `name` is provided, greet that person.
 ### Examples
 ```julia
 julia> greet()
-"Hello from JuliaPackageTemplate!"
+"Hello from OverpassAPI!"
 
 julia> greet("Julia")
 "Hello, Julia!"
 ```
 """
-greet() = "Hello from JuliaPackageTemplate!"
+greet() = "Hello from OverpassAPI!"
 greet(name::String) = "Hello, $name!"
 
 """
@@ -55,6 +55,6 @@ transform(x::AbstractVector; scale=1.0) = x .* scale
 
 The default greeting string used by [`greet`](@ref).
 """
-const DEFAULT_GREETING = "Hello from JuliaPackageTemplate!"
+const DEFAULT_GREETING = "Hello from OverpassAPI!"
 
 end # module

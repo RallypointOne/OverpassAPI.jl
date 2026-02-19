@@ -7,7 +7,7 @@ julia:
   project: "."
 
 book:
-  title: "JuliaPackageTemplate.jl"
+  title: "OverpassAPI.jl"
   search:
     location: sidebar
     keyboard-shortcut:
@@ -15,10 +15,10 @@ book:
   navbar:
     right:
       - icon: star
-        href: https://github.com/RallypointOne/JuliaPackageTemplate.jl/stargazers
+        href: https://github.com/RallypointOne/OverpassAPI.jl/stargazers
         text: "Star"
       - icon: github
-        href: https://github.com/RallypointOne/JuliaPackageTemplate.jl
+        href: https://github.com/RallypointOne/OverpassAPI.jl
   chapters:
     - part: "Docs"
       chapters:
