@@ -7,11 +7,10 @@ using Extents: Extents, Extent
 
 const GI = GeoInterface
 
-export query, bbox_string, Node, Way, Relation, Member, LatLon, OverpassResponse,
+export query, bbox_string, Element, Node, Way, Relation, Member, LatLon, OverpassResponse,
     nodes, ways, relations, DEFAULT_ENDPOINT
 
 #--------------------------------------------------------------------------------# Constants
-#--------------------------------------------------------------------------------
 
 """
     DEFAULT_ENDPOINT
@@ -21,7 +20,6 @@ The default Overpass API endpoint: `"https://overpass-api.de/api/interpreter"`.
 const DEFAULT_ENDPOINT = "https://overpass-api.de/api/interpreter"
 
 #--------------------------------------------------------------------------------# Types
-#--------------------------------------------------------------------------------
 
 """
     LatLon(lat, lon)
@@ -46,7 +44,16 @@ julia> GeoInterface.y(p)
 end
 
 """
-    Node
+    Element
+
+Abstract supertype for all OSM element types (`Node`, `Way`, `Relation`).
+
+All subtypes have `id::Int64` and `tags::Dict{String,String}` fields.
+"""
+abstract type Element end
+
+"""
+    Node <: Element
 
 An OpenStreetMap node (point feature).  Implements `GeoInterface.PointTrait`.
 
@@ -62,7 +69,7 @@ julia> n = Node(id=1, lat=40.748, lon=-73.985, tags=Dict("name" => "Example"))
 Node(1, 40.748, -73.985, Dict("name" => "Example"))
 ```
 """
-@kwdef struct Node
+@kwdef struct Node <: Element
     id::Int64
     lat::Float64
     lon::Float64
@@ -94,7 +101,7 @@ Member("way", 123, "outer", LatLon[])
 end
 
 """
-    Way
+    Way <: Element
 
 An OpenStreetMap way (line or polygon feature).  Implements `GeoInterface.LineStringTrait`
 when geometry data is available (query uses `out geom`).
@@ -111,7 +118,7 @@ julia> w = Way(id=1, tags=Dict("highway" => "residential"), node_ids=[1,2,3],
                geometry=[LatLon(40.0,-74.0), LatLon(40.1,-74.1), LatLon(40.2,-74.2)])
 ```
 """
-@kwdef struct Way
+@kwdef struct Way <: Element
     id::Int64
     tags::Dict{String,String} = Dict{String,String}()
     node_ids::Vector{Int64} = Int64[]
@@ -119,7 +126,7 @@ julia> w = Way(id=1, tags=Dict("highway" => "residential"), node_ids=[1,2,3],
 end
 
 """
-    Relation
+    Relation <: Element
 
 An OpenStreetMap relation (a group of elements with roles).
 
@@ -134,18 +141,11 @@ julia> r = Relation(id=1, tags=Dict("type" => "multipolygon"),
                members=[Member(type="way", ref=100, role="outer")])
 ```
 """
-@kwdef struct Relation
+@kwdef struct Relation <: Element
     id::Int64
     tags::Dict{String,String} = Dict{String,String}()
     members::Vector{Member} = Member[]
 end
-
-"""
-    Element
-
-Union type for all OSM element types: `Union{Node, Way, Relation}`.
-"""
-const Element = Union{Node, Way, Relation}
 
 """
     OverpassResponse
@@ -175,7 +175,6 @@ julia> ways(r)   # filter to just Way elements
 end
 
 #--------------------------------------------------------------------------------# Accessors
-#--------------------------------------------------------------------------------
 
 """
     nodes(response::OverpassResponse) -> Vector{Node}
@@ -199,18 +198,10 @@ Return all `Relation` elements from an `OverpassResponse`.
 relations(r::OverpassResponse) = Relation[e for e in r.elements if e isa Relation]
 
 # --- Tag access via getindex ---
-Base.getindex(n::Node, key::AbstractString) = n.tags[key]
-Base.getindex(w::Way, key::AbstractString) = w.tags[key]
-Base.getindex(r::Relation, key::AbstractString) = r.tags[key]
-Base.get(n::Node, key::AbstractString, default) = get(n.tags, key, default)
-Base.get(w::Way, key::AbstractString, default) = get(w.tags, key, default)
-Base.get(r::Relation, key::AbstractString, default) = get(r.tags, key, default)
-Base.haskey(n::Node, key::AbstractString) = haskey(n.tags, key)
-Base.haskey(w::Way, key::AbstractString) = haskey(w.tags, key)
-Base.haskey(r::Relation, key::AbstractString) = haskey(r.tags, key)
-Base.keys(n::Node) = keys(n.tags)
-Base.keys(w::Way) = keys(w.tags)
-Base.keys(r::Relation) = keys(r.tags)
+Base.getindex(e::Element, key::AbstractString) = e.tags[key]
+Base.get(e::Element, key::AbstractString, default) = get(e.tags, key, default)
+Base.haskey(e::Element, key::AbstractString) = haskey(e.tags, key)
+Base.keys(e::Element) = keys(e.tags)
 
 # --- OverpassResponse iteration and length ---
 Base.length(r::OverpassResponse) = length(r.elements)
@@ -218,7 +209,6 @@ Base.iterate(r::OverpassResponse, args...) = iterate(r.elements, args...)
 Base.eltype(::Type{OverpassResponse}) = Element
 
 #--------------------------------------------------------------------------------# JSON Parsing
-#--------------------------------------------------------------------------------
 
 function parse_tags(obj)::Dict{String,String}
     haskey(obj, :tags) ? Dict{String,String}(String(k) => String(v) for (k, v) in pairs(obj.tags)) : Dict{String,String}()
@@ -291,7 +281,6 @@ function parse_response(json::JSON3.Object)::OverpassResponse
 end
 
 #--------------------------------------------------------------------------------# Query
-#--------------------------------------------------------------------------------
 
 """
     bbox_string(ext::Extent) -> String
@@ -346,7 +335,6 @@ function query(ql::String; bbox::Union{Extent, Nothing}=nothing, endpoint::Strin
 end
 
 #--------------------------------------------------------------------------------# GeoInterface
-#--------------------------------------------------------------------------------
 
 # --- LatLon ---
 GI.isgeometry(::Type{LatLon}) = true
@@ -368,7 +356,6 @@ GI.ngeom(::GI.LineStringTrait, w::Way) = length(w.geometry)
 GI.getgeom(::GI.LineStringTrait, w::Way, i::Integer) = w.geometry[i]
 
 #--------------------------------------------------------------------------------# Extents
-#--------------------------------------------------------------------------------
 
 Extents.extent(p::LatLon) = Extent(X=(p.lon, p.lon), Y=(p.lat, p.lat))
 Extents.extent(n::Node) = Extent(X=(n.lon, n.lon), Y=(n.lat, n.lat))
@@ -381,7 +368,6 @@ function Extents.extent(w::Way)
 end
 
 #--------------------------------------------------------------------------------# Show Methods
-#--------------------------------------------------------------------------------
 
 function Base.show(io::IO, p::LatLon)
     print(io, "LatLon($(p.lat), $(p.lon))")

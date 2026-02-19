@@ -1,0 +1,224 @@
+---
+title: "Overpass QL"
+engine: julia
+---
+
+[Overpass QL](https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL) is the query language used by the [Overpass API](https://overpass-api.de/) to retrieve OpenStreetMap data. This page covers the most important concepts for writing queries with OverpassAPI.jl.
+
+## Query Structure
+
+Every Overpass QL query is a sequence of **statements** separated by semicolons. A typical query looks like:
+
+```
+[out:json][timeout:25];
+node[amenity=cafe](35.9,-79.1,36.1,-78.8);
+out geom;
+```
+
+- **Settings** (in square brackets) control output format, timeout, etc.
+- **Query statements** select elements from the database.
+- **Output statements** (`out`) control what data is returned.
+
+::: {.callout-note}
+`OverpassAPI.query()` automatically prepends `[out:json]` if it's not already present.
+:::
+
+## Element Types
+
+OpenStreetMap has three fundamental element types:
+
+| Type | Description | Example |
+|------|-------------|---------|
+| **`node`** | A single point (lat/lon) | A bench, a cafe, a traffic light |
+| **`way`** | An ordered list of nodes | A road, a building outline, a river |
+| **`relation`** | A group of nodes, ways, or other relations | A bus route, a multipolygon, a boundary |
+
+Use `nwr` as shorthand to query all three at once:
+
+```
+nwr[amenity=cafe](bbox);
+```
+
+## Tag Filters
+
+Tags are key-value pairs on elements. Filters go in square brackets:
+
+| Filter | Meaning |
+|--------|---------|
+| `[key=value]` | Exact match |
+| `[key!=value]` | Not equal |
+| `[key]` | Key exists (any value) |
+| `[!key]` | Key does not exist |
+| `[key~"regex"]` | Value matches regex |
+| `[key~"regex",i]` | Case-insensitive regex |
+| `["key"~"regex"]` | Quoted keys (for special characters) |
+
+Multiple filters are combined with AND:
+
+```
+node[amenity=cafe][cuisine=coffee](bbox);
+```
+
+## Bounding Boxes
+
+Bounding boxes restrict the geographic area. The format is `(south, west, north, east)`:
+
+```
+node[amenity=cafe](35.9,-79.1,36.1,-78.8);
+```
+
+With OverpassAPI.jl, you can use `Extents.Extent` instead of formatting the bbox manually:
+
+```julia
+using OverpassAPI, Extents
+
+r = query("node[amenity=cafe]; out geom;",
+          bbox=Extent(X=(-79.1, -78.8), Y=(35.9, 36.1)))
+```
+
+You can also set a **global bounding box** that applies to all statements:
+
+```
+[bbox:35.9,-79.1,36.1,-78.8];
+node[amenity=cafe];
+out;
+```
+
+## Area Searches
+
+Search within a named area (city, country, etc.) using `area`:
+
+```
+area[name="Durham"]->.searchArea;
+node[amenity=cafe](area.searchArea);
+out geom;
+```
+
+The `->.searchArea` syntax saves the result to a named set that later statements can reference.
+
+## Radius Searches
+
+Find elements within a radius (in meters) around a point:
+
+```
+node[amenity=pharmacy](around:1000,36.0,-78.9);
+out geom;
+```
+
+## Unions
+
+Combine multiple queries with a union block `(...)`:
+
+```
+(
+  node[amenity=cafe](bbox);
+  node[amenity=restaurant](bbox);
+);
+out geom;
+```
+
+## Recursion
+
+Ways are built from nodes, and relations from ways/nodes. Use recurse operators to resolve these references:
+
+| Operator | Meaning |
+|----------|---------|
+| `>` | Recurse down (get member nodes of ways, members of relations) |
+| `>>` | Recurse down recursively |
+| `<` | Recurse up (get parent ways/relations) |
+| `<<` | Recurse up recursively |
+
+A common pattern to get ways **and** their constituent nodes:
+
+```
+way[highway=primary](bbox);
+(._;>;);
+out body;
+```
+
+The `(._;>;)` idiom means: take the current result set (`._`) and union it with all its child elements (`>`).
+
+## Output Statements
+
+The `out` statement controls what data is returned:
+
+```
+out [verbosity] [geometry] [sort] [limit];
+```
+
+### Verbosity
+
+| Level | Included Data |
+|-------|---------------|
+| `ids` | Type and ID only |
+| `skel` | IDs + coordinates (nodes) / node refs (ways) |
+| `body` | **(default)** IDs, coordinates, node refs, tags |
+| `tags` | IDs + tags only |
+| `meta` | Everything in `body` + version, timestamp, user |
+
+### Geometry Modifiers
+
+| Modifier | Effect |
+|----------|--------|
+| *(none)* | Nodes have lat/lon; ways have node ID refs only |
+| `geom` | Full coordinate geometry on all elements |
+| `center` | Single center point added to ways/relations |
+| `bb` | Bounding box added to ways/relations |
+
+::: {.callout-tip}
+Use `out geom` to get coordinate data on Ways and Relations. Without it, Ways only contain node ID references and won't have GeoInterface geometry support.
+:::
+
+### Sort and Limit
+
+- `out body qt;` — sort by quadtile (faster than default ID sort)
+- `out body 10;` — limit to 10 results
+
+## Global Settings
+
+Settings are placed at the beginning of the query in square brackets:
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `[out:json]` | `xml` | Output format |
+| `[timeout:N]` | `180` | Query timeout in seconds |
+| `[maxsize:N]` | `536870912` | Maximum memory in bytes |
+| `[bbox:s,w,n,e]` | *(none)* | Global bounding box |
+| `[date:"YYYY-MM-DDTHH:MM:SSZ"]` | *(now)* | Query historical data |
+
+## Common Patterns
+
+### All cafes in a city
+
+```
+area[name="Durham"]->.a;
+node[amenity=cafe](area.a);
+out geom;
+```
+
+### Buildings in a bounding box (with full geometry)
+
+```
+way[building](35.99,-78.91,36.00,-78.90);
+out geom;
+```
+
+### Count elements
+
+```
+node[amenity=cafe](35.9,-79.1,36.1,-78.8);
+out count;
+```
+
+### Named elements matching a pattern
+
+```
+node["name"~"^Starbucks",i](35.9,-79.1,36.1,-78.8);
+out geom;
+```
+
+## Further Reading
+
+- [Overpass QL Reference](https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL) — full language specification
+- [Overpass API by Example](https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_API_by_Example) — cookbook-style examples
+- [Overpass Turbo](https://overpass-turbo.eu/) — interactive query editor with map preview

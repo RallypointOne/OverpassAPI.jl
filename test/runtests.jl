@@ -252,7 +252,7 @@ const MIXED_JSON = JSON3.read("""
     @testset "OverpassResponse iteration and length" begin
         r = parse_response(MIXED_JSON)
         @test length(r) == 3
-        @test eltype(typeof(r)) == OverpassAPI.Element
+        @test eltype(typeof(r)) == Element
         collected = collect(r)
         @test length(collected) == 3
         @test collected[1] isa Node
