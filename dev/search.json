@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "OverpassAPI.jl",
     "section": "",
-    "text": "Overview\nWelcome to the documentation for OverpassAPI.jl.\nOverpassAPI.jl is a Julia interface to the Overpass API for querying OpenStreetMap data.",
+    "text": "Overview\nWelcome to the documentation for OverpassAPI.jl.\nOverpassAPI.jl is a Julia interface to the Overpass API for querying OpenStreetMap data. Results are returned as typed Julia structs that implement GeoInterface.jl traits for interoperability with the Julia geospatial ecosystem.",
     "crumbs": [
       "Docs",
       "<span class='chapter-number'>1</span>  <span class='chapter-title'>OverpassAPI.jl</span>"
@@ -26,7 +26,7 @@
     "href": "index.html#quickstart",
     "title": "OverpassAPI.jl",
     "section": "Quickstart",
-    "text": "Quickstart\n\nprintln(\"Hello, World!\")\n\nHello, World!",
+    "text": "Quickstart\nusing OverpassAPI\n\n# Query cafes in Durham, NC\nr = query(\"node[amenity=cafe](35.9,-79.1,36.1,-78.8); out;\")\n\n# Access elements\nfor n in nodes(r)\n    println(n.tags[\"name\"])\nend",
     "crumbs": [
       "Docs",
       "<span class='chapter-number'>1</span>  <span class='chapter-title'>OverpassAPI.jl</span>"
@@ -37,10 +37,10 @@
     "href": "getting-started.html",
     "title": "Getting Started",
     "section": "",
-    "text": "Basic Usage",
+    "text": "Basic Usage\nUse query to send an Overpass QL query to the Overpass API. Results are returned as an OverpassResponse containing typed elements.",
     "crumbs": [
       "Docs",
-      "Getting Started"
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting Started</span>"
     ]
   },
   {
@@ -48,21 +48,65 @@
     "href": "getting-started.html#basic-usage",
     "title": "Getting Started",
     "section": "",
-    "text": "using OverpassAPI",
+    "text": "using OverpassAPI\n\nr = query(\"node[amenity=cafe](35.9,-79.1,36.1,-78.8); out;\")\n\n[out:json] is automatically prepended if not already present.",
     "crumbs": [
       "Docs",
-      "Getting Started"
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting Started</span>"
     ]
   },
   {
-    "objectID": "getting-started.html#examples",
-    "href": "getting-started.html#examples",
+    "objectID": "getting-started.html#filtering-elements",
+    "href": "getting-started.html#filtering-elements",
     "title": "Getting Started",
-    "section": "Examples",
-    "text": "Examples\nTODO: Add examples here.",
+    "section": "Filtering Elements",
+    "text": "Filtering Elements\nUse the convenience functions to filter by element type:\nnodes(r)      # Vector{Node}\nways(r)       # Vector{Way}\nrelations(r)  # Vector{Relation}",
     "crumbs": [
       "Docs",
-      "Getting Started"
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting Started</span>"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#accessing-tags",
+    "href": "getting-started.html#accessing-tags",
+    "title": "Getting Started",
+    "section": "Accessing Tags",
+    "text": "Accessing Tags\nEvery element has a tags field (a Dict{String,String}):\nn = first(nodes(r))\nn.tags[\"amenity\"]  # \"cafe\"\nn.tags[\"name\"]     # \"Joe Van Gogh\"",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting Started</span>"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#getting-geometry-with-out-geom",
+    "href": "getting-started.html#getting-geometry-with-out-geom",
+    "title": "Getting Started",
+    "section": "Getting Geometry with out geom",
+    "text": "Getting Geometry with out geom\nTo get full coordinate geometry on Ways and Relations, use out geom in your query:\nr = query(\"\"\"\n    way[building](35.99,-78.91,36.00,-78.90);\n    out geom;\n\"\"\")\n\nw = first(ways(r))\nw.geometry  # Vector{LatLon} with coordinates\nWithout out geom, Ways only contain node ID references (node_ids) and no coordinate data.",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting Started</span>"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#geointerface-integration",
+    "href": "getting-started.html#geointerface-integration",
+    "title": "Getting Started",
+    "section": "GeoInterface Integration",
+    "text": "GeoInterface Integration\nAll geometry types implement GeoInterface.jl traits:\n\nNode and LatLon implement PointTrait\nWay implements LineStringTrait (when geometry is available)\n\nusing GeoInterface\nconst GI = GeoInterface\n\nn = Node(id=1, lat=40.748, lon=-73.985)\nGI.x(n)  # -73.985 (longitude)\nGI.y(n)  # 40.748  (latitude)\nThis means OverpassAPI types work with any package that accepts GeoInterface geometries.",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting Started</span>"
+    ]
+  },
+  {
+    "objectID": "getting-started.html#overpass-ql-tips",
+    "href": "getting-started.html#overpass-ql-tips",
+    "title": "Getting Started",
+    "section": "Overpass QL Tips",
+    "text": "Overpass QL Tips\nBounding box format: (south, west, north, east)\nSearch by area name:\narea[name=\"Durham\"]-&gt;.a;\nnode[amenity=cafe](area.a);\nout;\nUnion multiple types:\n(\n  node[amenity=restaurant](bbox);\n  way[amenity=restaurant](bbox);\n);\nout geom;\nLimit results:\nnode[amenity=cafe](35.9,-79.1,36.1,-78.8);\nout 10;\nSee the Overpass QL documentation for the full query language reference.",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Getting Started</span>"
     ]
   },
   {
@@ -73,7 +117,7 @@
     "text": "Types",
     "crumbs": [
       "API",
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>API</span>"
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>API</span>"
     ]
   },
   {
@@ -81,10 +125,10 @@
     "href": "api.html#types",
     "title": "API",
     "section": "",
-    "text": "Config\n\n\nConfig\nConfiguration for the package.\n\nFields\n\nname::String: The name to use in greetings.\nverbose::Bool: Whether to print extra information.",
+    "text": "LatLon\n\n\nLatLon(lat, lon)\nA lightweight latitude/longitude coordinate pair. Implements GeoInterface.PointTrait.\n\nExamples\njulia&gt; p = LatLon(40.748, -73.985)\nLatLon(40.748, -73.985)\n\njulia&gt; GeoInterface.x(p)\n-73.985\n\njulia&gt; GeoInterface.y(p)\n40.748\n\n\n\n\n\nMember\n\n\nMember\nA member of an OSM relation.\n\nFields\n\ntype::String: Element type (\"node\", \"way\", or \"relation\").\nref::Int64: OSM ID of the referenced element.\nrole::String: Role within the relation (e.g. \"outer\", \"inner\", \"stop\").\ngeometry::Vector{LatLon}: Coordinates (populated when query uses out geom).\n\n\nExamples\njulia&gt; m = Member(type=\"way\", ref=123, role=\"outer\")\nMember(\"way\", 123, \"outer\", LatLon[])\n\n\n\n\n\n\nNode\n\n\nNode\nAn OpenStreetMap node (point feature). Implements GeoInterface.PointTrait.\n\nFields\n\nid::Int64: OSM node ID.\nlat::Float64: Latitude.\nlon::Float64: Longitude.\ntags::Dict{String,String}: Key-value tags.\n\n\nExamples\njulia&gt; n = Node(id=1, lat=40.748, lon=-73.985, tags=Dict(\"name\" =&gt; \"Example\"))\nNode(1, 40.748, -73.985, Dict(\"name\" =&gt; \"Example\"))\n\n\n\n\n\n\nOverpassResponse\n\n\nOverpassResponse\nThe parsed response from an Overpass API query.\n\nFields\n\nversion::Float64: API version (typically 0.6).\ngenerator::String: Generator string from the API.\ntimestamp::String: OSM data timestamp.\nelements::Vector{Element}: All returned elements.\n\n\nExamples\njulia&gt; r = query(\"node[amenity=cafe](35.9,-79.1,36.1,-78.8); out geom;\")\n\njulia&gt; nodes(r)  # filter to just Node elements\n\njulia&gt; ways(r)   # filter to just Way elements\n\n\n\n\n\n\nRelation\n\n\nRelation\nAn OpenStreetMap relation (a group of elements with roles).\n\nFields\n\nid::Int64: OSM relation ID.\ntags::Dict{String,String}: Key-value tags.\nmembers::Vector{Member}: Ordered list of members.\n\n\nExamples\njulia&gt; r = Relation(id=1, tags=Dict(\"type\" =&gt; \"multipolygon\"),\n               members=[Member(type=\"way\", ref=100, role=\"outer\")])\n\n\n\n\n\n\nWay\n\n\nWay\nAn OpenStreetMap way (line or polygon feature). Implements GeoInterface.LineStringTrait when geometry data is available (query uses out geom).\n\nFields\n\nid::Int64: OSM way ID.\ntags::Dict{String,String}: Key-value tags.\nnode_ids::Vector{Int64}: Ordered list of constituent node IDs.\ngeometry::Vector{LatLon}: Coordinates (populated when query uses out geom).\n\n\nExamples\njulia&gt; w = Way(id=1, tags=Dict(\"highway\" =&gt; \"residential\"), node_ids=[1,2,3],\n               geometry=[LatLon(40.0,-74.0), LatLon(40.1,-74.1), LatLon(40.2,-74.2)])",
     "crumbs": [
       "API",
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>API</span>"
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>API</span>"
     ]
   },
   {
@@ -92,10 +136,10 @@
     "href": "api.html#functions",
     "title": "API",
     "section": "Functions",
-    "text": "Functions\n\ngreet\n\n\ngreet()\ngreet(name::String)\nReturn a greeting string. If name is provided, greet that person.\n\nExamples\njulia&gt; greet()\n\"Hello from OverpassAPI!\"\n\njulia&gt; greet(\"Julia\")\n\"Hello, Julia!\"\n\n\n\n\n\ntransform\n\n\ntransform(x::AbstractVector; scale=1.0)\nApply a transformation to x, scaling each element by scale.\n\nExamples\njulia&gt; transform([1, 2, 3]; scale=2.0)\n3-element Vector{Float64}:\n 2.0\n 4.0\n 6.0",
+    "text": "Functions\n\nbbox_string\n\n\nbbox_string(ext::Extent) -&gt; String\nConvert an Extents.Extent to an Overpass bbox string \"(south,west,north,east)\".\n\nExamples\njulia&gt; bbox_string(Extent(X=(-79.1, -78.8), Y=(35.9, 36.1)))\n\"(35.9,-79.1,36.1,-78.8)\"\n\n\n\n\n\nnodes\n\n\nnodes(response::OverpassResponse) -&gt; Vector{Node}\nReturn all Node elements from an OverpassResponse.\n\n\n\n\nquery\n\n\nquery(ql::String; bbox=nothing, endpoint=DEFAULT_ENDPOINT) -&gt; OverpassResponse\nExecute an Overpass QL query and return the parsed response.\n[out:json] is automatically prepended if not already present in the query.\nIf bbox is provided as an Extents.Extent, a global [bbox:south,west,north,east] setting is prepended to the query, applying the bounding box to all statements.\n\nExamples\njulia&gt; using Extents\n\njulia&gt; r = query(\"node[amenity=cafe]; out geom;\",\n                  bbox=Extent(X=(-79.1, -78.8), Y=(35.9, 36.1)))\n\njulia&gt; r = query(\"node[amenity=cafe](35.9,-79.1,36.1,-78.8); out geom;\")\n\n\n\n\n\nrelations\n\n\nrelations(response::OverpassResponse) -&gt; Vector{Relation}\nReturn all Relation elements from an OverpassResponse.\n\n\n\n\nways\n\n\nways(response::OverpassResponse) -&gt; Vector{Way}\nReturn all Way elements from an OverpassResponse.",
     "crumbs": [
       "API",
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>API</span>"
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>API</span>"
     ]
   },
   {
@@ -103,10 +147,10 @@
     "href": "api.html#constants",
     "title": "API",
     "section": "Constants",
-    "text": "Constants\n\nDEFAULT_GREETING\n\n\nString(s::AbstractString)\nCreate a new String from an existing AbstractString.\nString(v::AbstractVector{UInt8})\nCreate a new String object using the data buffer from byte vector v. If v is a Vector{UInt8} it will be truncated to zero length and future modification of v cannot affect the contents of the resulting string. To avoid truncation of Vector{UInt8} data, use String(copy(v)); for other AbstractVector types, String(v) already makes a copy.\nWhen possible, the memory of v will be used without copying when the String object is created. This is guaranteed to be the case for byte vectors returned by take! on a writable IOBuffer and by calls to read(io, nb). This allows zero-copy conversion of I/O data to strings. In other cases, Vector{UInt8} data may be copied, but v is truncated anyway to guarantee consistent behavior.\nString &lt;: AbstractString\nThe default string type in Julia, used by e.g. string literals.\nStrings are immutable sequences of Chars. A String is stored internally as a contiguous byte array, and while they are interpreted as being UTF-8 encoded, they can be composed of any byte sequence. Use isvalid to validate that the underlying byte sequence is valid as UTF-8.",
+    "text": "Constants\n\nDEFAULT_ENDPOINT\n\n\nString(s::AbstractString)\nCreate a new String from an existing AbstractString.\nString(v::AbstractVector{UInt8})\nCreate a new String object using the data buffer from byte vector v. If v is a Vector{UInt8} it will be truncated to zero length and future modification of v cannot affect the contents of the resulting string. To avoid truncation of Vector{UInt8} data, use String(copy(v)); for other AbstractVector types, String(v) already makes a copy.\nWhen possible, the memory of v will be used without copying when the String object is created. This is guaranteed to be the case for byte vectors returned by take! on a writable IOBuffer and by calls to read(io, nb). This allows zero-copy conversion of I/O data to strings. In other cases, Vector{UInt8} data may be copied, but v is truncated anyway to guarantee consistent behavior.\nString &lt;: AbstractString\nThe default string type in Julia, used by e.g. string literals.\nStrings are immutable sequences of Chars. A String is stored internally as a contiguous byte array, and while they are interpreted as being UTF-8 encoded, they can be composed of any byte sequence. Use isvalid to validate that the underlying byte sequence is valid as UTF-8.\nX509Name to string.",
     "crumbs": [
       "API",
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>API</span>"
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>API</span>"
     ]
   },
   {
@@ -117,7 +161,7 @@
     "text": "Unreleased",
     "crumbs": [
       "Reference",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Changelog</span>"
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
     ]
   }
 ]
