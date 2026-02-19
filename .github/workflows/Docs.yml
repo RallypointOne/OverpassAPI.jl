@@ -40,7 +40,7 @@ jobs:
           version: '1'
       - uses: julia-actions/cache@v2
       - name: Install docs dependencies
-        run: julia --project=docs -e 'using Pkg; Pkg.develop(path="."); Pkg.instantiate()'
+        run: julia --project=docs -e 'using Pkg; Pkg.develop(path="."); Pkg.instantiate(); Pkg.precompile()'
       - name: Install lcov
         run: sudo apt-get install -y lcov
       - uses: quarto-dev/quarto-actions/setup@v2
