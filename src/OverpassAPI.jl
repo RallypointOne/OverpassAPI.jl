@@ -7,7 +7,8 @@ using Extents: Extents, Extent
 
 const GI = GeoInterface
 
-export query, bbox_string, Element, Node, Way, Relation, Member, LatLon, OverpassResponse,
+export query, bbox_string, OQL, QLStatement, overpass_ql,
+    Element, Node, Way, Relation, Member, LatLon, OverpassResponse,
     nodes, ways, relations, DEFAULT_ENDPOINT
 
 #--------------------------------------------------------------------------------# Constants
@@ -280,6 +281,94 @@ function parse_response(json::JSON3.Object)::OverpassResponse
     )
 end
 
+#--------------------------------------------------------------------------------# Query Builder
+
+"""
+    QLStatement
+
+A composable Overpass QL statement built using [`OQL`](@ref) with dot and bracket syntax.
+
+Use [`overpass_ql`](@ref) to convert to a string, or pass directly to [`query`](@ref).
+
+### Examples
+```julia
+julia> OQL.node["amenity" => "cafe"]
+node[amenity=cafe]
+
+julia> OQL.way["building"]["name" => r"^Duke"i]
+way[building][name~"^Duke",i]
+```
+"""
+struct QLStatement
+    type::String
+    filters::Vector{String}
+end
+
+"""
+    OQL
+
+Query builder for Overpass QL statements.  Use dot syntax to select element types
+(`node`, `way`, `relation`, `rel`, `nwr`) and bracket syntax to add tag filters.
+
+### Examples
+```julia
+julia> OQL.node
+node
+
+julia> OQL.node["amenity" => "cafe"]
+node[amenity=cafe]
+
+julia> OQL.nwr["building"]
+nwr[building]
+```
+"""
+struct _OQLBuilder end
+const OQL = _OQLBuilder()
+
+Base.getproperty(::_OQLBuilder, name::Symbol) = QLStatement(String(name), String[])
+
+# Tag exact match: OQL.node["amenity" => "cafe"]
+function Base.getindex(s::QLStatement, pair::Pair{<:AbstractString, <:AbstractString})
+    QLStatement(s.type, [s.filters; "[$(pair.first)=$(pair.second)]"])
+end
+
+# Tag exists: OQL.node["building"]
+function Base.getindex(s::QLStatement, key::AbstractString)
+    QLStatement(s.type, [s.filters; "[$key]"])
+end
+
+# Tag regex: OQL.node["name" => r"^Starbucks"i]
+function Base.getindex(s::QLStatement, pair::Pair{<:AbstractString, Regex})
+    flags = pair.second.compile_options & Base.PCRE.CASELESS != 0 ? ",i" : ""
+    QLStatement(s.type, [s.filters; "[$(pair.first)~\"$(pair.second.pattern)\"$flags]"])
+end
+
+# Keyword syntax: OQL.node[amenity = "cafe", cuisine = "coffee"]
+function Base.getindex(s::QLStatement; kwargs...)
+    result = s
+    for (k, v) in kwargs
+        result = result[String(k) => v]
+    end
+    result
+end
+
+"""
+    overpass_ql(s::QLStatement) -> String
+
+Convert a `QLStatement` to its Overpass QL string representation.
+
+### Examples
+```julia
+julia> overpass_ql(OQL.node["amenity" => "cafe"])
+"node[amenity=cafe]"
+```
+"""
+overpass_ql(s::QLStatement) = s.type * join(s.filters)
+
+function Base.show(io::IO, s::QLStatement)
+    print(io, overpass_ql(s))
+end
+
 #--------------------------------------------------------------------------------# Query
 
 """
@@ -332,6 +421,31 @@ function query(ql::String; bbox::Union{Extent, Nothing}=nothing, endpoint::Strin
     end
     json = JSON3.read(resp.body)
     parse_response(json)
+end
+
+"""
+    query(s::QLStatement; out=:geom, bbox=nothing, endpoint=DEFAULT_ENDPOINT) -> OverpassResponse
+
+Execute a [`QLStatement`](@ref) built with [`OQL`](@ref).
+
+The `out` keyword controls the output verbosity/geometry (default `:geom`).
+Accepts a `Symbol` (e.g. `:geom`, `:body`, `:center`, `:count`) or a `String`
+for full control (e.g. `"body qt 100"`).
+
+### Examples
+```julia
+julia> using Extents
+
+julia> r = query(OQL.node["amenity" => "cafe"],
+                 bbox=Extent(X=(-79.1, -78.8), Y=(35.9, 36.1)))
+
+julia> r = query(OQL.way["building"], bbox=ext, out=:center)
+```
+"""
+function query(s::QLStatement; out::Union{Symbol,String}=:geom,
+               bbox::Union{Extent, Nothing}=nothing, endpoint::String=DEFAULT_ENDPOINT)
+    ql = overpass_ql(s) * "; out $out;"
+    query(ql; bbox, endpoint)
 end
 
 #--------------------------------------------------------------------------------# GeoInterface

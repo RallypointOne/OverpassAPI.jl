@@ -288,6 +288,63 @@ const MIXED_JSON = JSON3.read("""
         @test_throws ErrorException Extents.extent(w2)
     end
 
+    @testset "OQL builder - getproperty" begin
+        @test overpass_ql(OQL.node) == "node"
+        @test overpass_ql(OQL.way) == "way"
+        @test overpass_ql(OQL.relation) == "relation"
+        @test overpass_ql(OQL.rel) == "rel"
+        @test overpass_ql(OQL.nwr) == "nwr"
+    end
+
+    @testset "OQL builder - tag filters" begin
+        # Exact match
+        s = OQL.node["amenity" => "cafe"]
+        @test overpass_ql(s) == "node[amenity=cafe]"
+
+        # Tag exists
+        s = OQL.way["building"]
+        @test overpass_ql(s) == "way[building]"
+
+        # Multiple filters (chained)
+        s = OQL.node["amenity" => "cafe"]["cuisine" => "coffee"]
+        @test overpass_ql(s) == "node[amenity=cafe][cuisine=coffee]"
+
+        # Regex
+        s = OQL.node["name" => r"^Starbucks"]
+        @test overpass_ql(s) == "node[name~\"^Starbucks\"]"
+
+        # Case-insensitive regex
+        s = OQL.node["name" => r"^starbucks"i]
+        @test overpass_ql(s) == "node[name~\"^starbucks\",i]"
+
+        # Mixed filter types
+        s = OQL.node["amenity" => "cafe"]["name" => r"^Star"i]["wifi"]
+        @test overpass_ql(s) == "node[amenity=cafe][name~\"^Star\",i][wifi]"
+    end
+
+    @testset "OQL builder - keyword syntax" begin
+        @test overpass_ql(OQL.node[amenity = "cafe"]) == "node[amenity=cafe]"
+        @test overpass_ql(OQL.node[amenity = "cafe", cuisine = "coffee"]) == "node[amenity=cafe][cuisine=coffee]"
+        @test overpass_ql(OQL.way[building = "yes"]) == "way[building=yes]"
+        @test overpass_ql(OQL.node[name = r"^Star"i]) == "node[name~\"^Star\",i]"
+        # Mixed: keyword then positional
+        s = OQL.node[amenity = "cafe"]["wifi"]
+        @test overpass_ql(s) == "node[amenity=cafe][wifi]"
+    end
+
+    @testset "OQL builder - show" begin
+        @test repr(OQL.node["amenity" => "cafe"]) == "node[amenity=cafe]"
+    end
+
+    @testset "OQL builder - immutability" begin
+        base = OQL.node
+        a = base["amenity" => "cafe"]
+        b = base["highway" => "primary"]
+        @test overpass_ql(a) == "node[amenity=cafe]"
+        @test overpass_ql(b) == "node[highway=primary]"
+        @test overpass_ql(base) == "node"
+    end
+
     @testset "Show methods" begin
         @test repr(LatLon(1.0, 2.0)) == "LatLon(1.0, 2.0)"
         @test contains(repr(Node(id=1, lat=1.0, lon=2.0)), "Node(1")
