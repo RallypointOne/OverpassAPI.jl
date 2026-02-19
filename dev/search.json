@@ -110,6 +110,149 @@
     ]
   },
   {
+    "objectID": "overpass-ql.html",
+    "href": "overpass-ql.html",
+    "title": "Overpass QL",
+    "section": "",
+    "text": "Query Structure\nOverpass QL is the query language used by the Overpass API to retrieve OpenStreetMap data. This page covers the most important concepts for writing queries with OverpassAPI.jl.\nEvery Overpass QL query is a sequence of statements separated by semicolons. A typical query looks like:",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Overpass QL</span>"
+    ]
+  },
+  {
+    "objectID": "overpass-ql.html#query-structure",
+    "href": "overpass-ql.html#query-structure",
+    "title": "Overpass QL",
+    "section": "",
+    "text": "[out:json][timeout:25];\nnode[amenity=cafe](35.9,-79.1,36.1,-78.8);\nout geom;\n\nSettings (in square brackets) control output format, timeout, etc.\nQuery statements select elements from the database.\nOutput statements (out) control what data is returned.\n\n\n\n\n\n\n\nNote\n\n\n\nOverpassAPI.query() automatically prepends [out:json] if it’s not already present.",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Overpass QL</span>"
+    ]
+  },
+  {
+    "objectID": "overpass-ql.html#element-types",
+    "href": "overpass-ql.html#element-types",
+    "title": "Overpass QL",
+    "section": "Element Types",
+    "text": "Element Types\nOpenStreetMap has three fundamental element types:\n\n\n\n\n\n\n\n\nType\nDescription\nExample\n\n\n\n\nnode\nA single point (lat/lon)\nA bench, a cafe, a traffic light\n\n\nway\nAn ordered list of nodes\nA road, a building outline, a river\n\n\nrelation\nA group of nodes, ways, or other relations\nA bus route, a multipolygon, a boundary\n\n\n\nUse nwr as shorthand to query all three at once:\nnwr[amenity=cafe](bbox);",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Overpass QL</span>"
+    ]
+  },
+  {
+    "objectID": "overpass-ql.html#tag-filters",
+    "href": "overpass-ql.html#tag-filters",
+    "title": "Overpass QL",
+    "section": "Tag Filters",
+    "text": "Tag Filters\nTags are key-value pairs on elements. Filters go in square brackets:\n\n\n\nFilter\nMeaning\n\n\n\n\n[key=value]\nExact match\n\n\n[key!=value]\nNot equal\n\n\n[key]\nKey exists (any value)\n\n\n[!key]\nKey does not exist\n\n\n[key~\"regex\"]\nValue matches regex\n\n\n[key~\"regex\",i]\nCase-insensitive regex\n\n\n[\"key\"~\"regex\"]\nQuoted keys (for special characters)\n\n\n\nMultiple filters are combined with AND:\nnode[amenity=cafe][cuisine=coffee](bbox);",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Overpass QL</span>"
+    ]
+  },
+  {
+    "objectID": "overpass-ql.html#bounding-boxes",
+    "href": "overpass-ql.html#bounding-boxes",
+    "title": "Overpass QL",
+    "section": "Bounding Boxes",
+    "text": "Bounding Boxes\nBounding boxes restrict the geographic area. The format is (south, west, north, east):\nnode[amenity=cafe](35.9,-79.1,36.1,-78.8);\nWith OverpassAPI.jl, you can use Extents.Extent instead of formatting the bbox manually:\nusing OverpassAPI, Extents\n\nr = query(\"node[amenity=cafe]; out geom;\",\n          bbox=Extent(X=(-79.1, -78.8), Y=(35.9, 36.1)))\nYou can also set a global bounding box that applies to all statements:\n[bbox:35.9,-79.1,36.1,-78.8];\nnode[amenity=cafe];\nout;",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Overpass QL</span>"
+    ]
+  },
+  {
+    "objectID": "overpass-ql.html#area-searches",
+    "href": "overpass-ql.html#area-searches",
+    "title": "Overpass QL",
+    "section": "Area Searches",
+    "text": "Area Searches\nSearch within a named area (city, country, etc.) using area:\narea[name=\"Durham\"]-&gt;.searchArea;\nnode[amenity=cafe](area.searchArea);\nout geom;\nThe -&gt;.searchArea syntax saves the result to a named set that later statements can reference.",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Overpass QL</span>"
+    ]
+  },
+  {
+    "objectID": "overpass-ql.html#radius-searches",
+    "href": "overpass-ql.html#radius-searches",
+    "title": "Overpass QL",
+    "section": "Radius Searches",
+    "text": "Radius Searches\nFind elements within a radius (in meters) around a point:\nnode[amenity=pharmacy](around:1000,36.0,-78.9);\nout geom;",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Overpass QL</span>"
+    ]
+  },
+  {
+    "objectID": "overpass-ql.html#unions",
+    "href": "overpass-ql.html#unions",
+    "title": "Overpass QL",
+    "section": "Unions",
+    "text": "Unions\nCombine multiple queries with a union block (...):\n(\n  node[amenity=cafe](bbox);\n  node[amenity=restaurant](bbox);\n);\nout geom;",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Overpass QL</span>"
+    ]
+  },
+  {
+    "objectID": "overpass-ql.html#recursion",
+    "href": "overpass-ql.html#recursion",
+    "title": "Overpass QL",
+    "section": "Recursion",
+    "text": "Recursion\nWays are built from nodes, and relations from ways/nodes. Use recurse operators to resolve these references:\n\n\n\nOperator\nMeaning\n\n\n\n\n&gt;\nRecurse down (get member nodes of ways, members of relations)\n\n\n&gt;&gt;\nRecurse down recursively\n\n\n&lt;\nRecurse up (get parent ways/relations)\n\n\n&lt;&lt;\nRecurse up recursively\n\n\n\nA common pattern to get ways and their constituent nodes:\nway[highway=primary](bbox);\n(._;&gt;;);\nout body;\nThe (._;&gt;;) idiom means: take the current result set (._) and union it with all its child elements (&gt;).",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Overpass QL</span>"
+    ]
+  },
+  {
+    "objectID": "overpass-ql.html#output-statements",
+    "href": "overpass-ql.html#output-statements",
+    "title": "Overpass QL",
+    "section": "Output Statements",
+    "text": "Output Statements\nThe out statement controls what data is returned:\nout [verbosity] [geometry] [sort] [limit];\n\nVerbosity\n\n\n\nLevel\nIncluded Data\n\n\n\n\nids\nType and ID only\n\n\nskel\nIDs + coordinates (nodes) / node refs (ways)\n\n\nbody\n(default) IDs, coordinates, node refs, tags\n\n\ntags\nIDs + tags only\n\n\nmeta\nEverything in body + version, timestamp, user\n\n\n\n\n\nGeometry Modifiers\n\n\n\nModifier\nEffect\n\n\n\n\n(none)\nNodes have lat/lon; ways have node ID refs only\n\n\ngeom\nFull coordinate geometry on all elements\n\n\ncenter\nSingle center point added to ways/relations\n\n\nbb\nBounding box added to ways/relations\n\n\n\n\n\n\n\n\n\nTip\n\n\n\nUse out geom to get coordinate data on Ways and Relations. Without it, Ways only contain node ID references and won’t have GeoInterface geometry support.\n\n\n\n\nSort and Limit\n\nout body qt; — sort by quadtile (faster than default ID sort)\nout body 10; — limit to 10 results",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Overpass QL</span>"
+    ]
+  },
+  {
+    "objectID": "overpass-ql.html#global-settings",
+    "href": "overpass-ql.html#global-settings",
+    "title": "Overpass QL",
+    "section": "Global Settings",
+    "text": "Global Settings\nSettings are placed at the beginning of the query in square brackets:\n\n\n\nSetting\nDefault\nDescription\n\n\n\n\n[out:json]\nxml\nOutput format\n\n\n[timeout:N]\n180\nQuery timeout in seconds\n\n\n[maxsize:N]\n536870912\nMaximum memory in bytes\n\n\n[bbox:s,w,n,e]\n(none)\nGlobal bounding box\n\n\n[date:\"YYYY-MM-DDTHH:MM:SSZ\"]\n(now)\nQuery historical data",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Overpass QL</span>"
+    ]
+  },
+  {
+    "objectID": "overpass-ql.html#common-patterns",
+    "href": "overpass-ql.html#common-patterns",
+    "title": "Overpass QL",
+    "section": "Common Patterns",
+    "text": "Common Patterns\n\nAll cafes in a city\narea[name=\"Durham\"]-&gt;.a;\nnode[amenity=cafe](area.a);\nout geom;\n\n\nBuildings in a bounding box (with full geometry)\nway[building](35.99,-78.91,36.00,-78.90);\nout geom;\n\n\nCount elements\nnode[amenity=cafe](35.9,-79.1,36.1,-78.8);\nout count;\n\n\nNamed elements matching a pattern\nnode[\"name\"~\"^Starbucks\",i](35.9,-79.1,36.1,-78.8);\nout geom;",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Overpass QL</span>"
+    ]
+  },
+  {
+    "objectID": "overpass-ql.html#further-reading",
+    "href": "overpass-ql.html#further-reading",
+    "title": "Overpass QL",
+    "section": "Further Reading",
+    "text": "Further Reading\n\nOverpass QL Reference — full language specification\nOverpass API by Example — cookbook-style examples\nOverpass Turbo — interactive query editor with map preview",
+    "crumbs": [
+      "Docs",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Overpass QL</span>"
+    ]
+  },
+  {
     "objectID": "api.html",
     "href": "api.html",
     "title": "API",
@@ -117,7 +260,7 @@
     "text": "Types",
     "crumbs": [
       "API",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>API</span>"
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>API</span>"
     ]
   },
   {
@@ -125,10 +268,10 @@
     "href": "api.html#types",
     "title": "API",
     "section": "",
-    "text": "LatLon\n\n\nLatLon(lat, lon)\nA lightweight latitude/longitude coordinate pair. Implements GeoInterface.PointTrait.\n\nExamples\njulia&gt; p = LatLon(40.748, -73.985)\nLatLon(40.748, -73.985)\n\njulia&gt; GeoInterface.x(p)\n-73.985\n\njulia&gt; GeoInterface.y(p)\n40.748\n\n\n\n\n\nMember\n\n\nMember\nA member of an OSM relation.\n\nFields\n\ntype::String: Element type (\"node\", \"way\", or \"relation\").\nref::Int64: OSM ID of the referenced element.\nrole::String: Role within the relation (e.g. \"outer\", \"inner\", \"stop\").\ngeometry::Vector{LatLon}: Coordinates (populated when query uses out geom).\n\n\nExamples\njulia&gt; m = Member(type=\"way\", ref=123, role=\"outer\")\nMember(\"way\", 123, \"outer\", LatLon[])\n\n\n\n\n\n\nNode\n\n\nNode\nAn OpenStreetMap node (point feature). Implements GeoInterface.PointTrait.\n\nFields\n\nid::Int64: OSM node ID.\nlat::Float64: Latitude.\nlon::Float64: Longitude.\ntags::Dict{String,String}: Key-value tags.\n\n\nExamples\njulia&gt; n = Node(id=1, lat=40.748, lon=-73.985, tags=Dict(\"name\" =&gt; \"Example\"))\nNode(1, 40.748, -73.985, Dict(\"name\" =&gt; \"Example\"))\n\n\n\n\n\n\nOverpassResponse\n\n\nOverpassResponse\nThe parsed response from an Overpass API query.\n\nFields\n\nversion::Float64: API version (typically 0.6).\ngenerator::String: Generator string from the API.\ntimestamp::String: OSM data timestamp.\nelements::Vector{Element}: All returned elements.\n\n\nExamples\njulia&gt; r = query(\"node[amenity=cafe](35.9,-79.1,36.1,-78.8); out geom;\")\n\njulia&gt; nodes(r)  # filter to just Node elements\n\njulia&gt; ways(r)   # filter to just Way elements\n\n\n\n\n\n\nRelation\n\n\nRelation\nAn OpenStreetMap relation (a group of elements with roles).\n\nFields\n\nid::Int64: OSM relation ID.\ntags::Dict{String,String}: Key-value tags.\nmembers::Vector{Member}: Ordered list of members.\n\n\nExamples\njulia&gt; r = Relation(id=1, tags=Dict(\"type\" =&gt; \"multipolygon\"),\n               members=[Member(type=\"way\", ref=100, role=\"outer\")])\n\n\n\n\n\n\nWay\n\n\nWay\nAn OpenStreetMap way (line or polygon feature). Implements GeoInterface.LineStringTrait when geometry data is available (query uses out geom).\n\nFields\n\nid::Int64: OSM way ID.\ntags::Dict{String,String}: Key-value tags.\nnode_ids::Vector{Int64}: Ordered list of constituent node IDs.\ngeometry::Vector{LatLon}: Coordinates (populated when query uses out geom).\n\n\nExamples\njulia&gt; w = Way(id=1, tags=Dict(\"highway\" =&gt; \"residential\"), node_ids=[1,2,3],\n               geometry=[LatLon(40.0,-74.0), LatLon(40.1,-74.1), LatLon(40.2,-74.2)])",
+    "text": "Element\n\n\nElement\nAbstract supertype for all OSM element types (Node, Way, Relation).\nAll subtypes have id::Int64 and tags::Dict{String,String} fields.\n\n\n\n\nLatLon\n\n\nLatLon(lat, lon)\nA lightweight latitude/longitude coordinate pair. Implements GeoInterface.PointTrait.\n\nExamples\njulia&gt; p = LatLon(40.748, -73.985)\nLatLon(40.748, -73.985)\n\njulia&gt; GeoInterface.x(p)\n-73.985\n\njulia&gt; GeoInterface.y(p)\n40.748\n\n\n\n\n\nMember\n\n\nMember\nA member of an OSM relation.\n\nFields\n\ntype::String: Element type (\"node\", \"way\", or \"relation\").\nref::Int64: OSM ID of the referenced element.\nrole::String: Role within the relation (e.g. \"outer\", \"inner\", \"stop\").\ngeometry::Vector{LatLon}: Coordinates (populated when query uses out geom).\n\n\nExamples\njulia&gt; m = Member(type=\"way\", ref=123, role=\"outer\")\nMember(\"way\", 123, \"outer\", LatLon[])\n\n\n\n\n\n\nNode\n\n\nNode &lt;: Element\nAn OpenStreetMap node (point feature). Implements GeoInterface.PointTrait.\n\nFields\n\nid::Int64: OSM node ID.\nlat::Float64: Latitude.\nlon::Float64: Longitude.\ntags::Dict{String,String}: Key-value tags.\n\n\nExamples\njulia&gt; n = Node(id=1, lat=40.748, lon=-73.985, tags=Dict(\"name\" =&gt; \"Example\"))\nNode(1, 40.748, -73.985, Dict(\"name\" =&gt; \"Example\"))\n\n\n\n\n\n\nOverpassResponse\n\n\nOverpassResponse\nThe parsed response from an Overpass API query.\n\nFields\n\nversion::Float64: API version (typically 0.6).\ngenerator::String: Generator string from the API.\ntimestamp::String: OSM data timestamp.\nelements::Vector{Element}: All returned elements.\n\n\nExamples\njulia&gt; r = query(\"node[amenity=cafe](35.9,-79.1,36.1,-78.8); out geom;\")\n\njulia&gt; nodes(r)  # filter to just Node elements\n\njulia&gt; ways(r)   # filter to just Way elements\n\n\n\n\n\n\nRelation\n\n\nRelation &lt;: Element\nAn OpenStreetMap relation (a group of elements with roles).\n\nFields\n\nid::Int64: OSM relation ID.\ntags::Dict{String,String}: Key-value tags.\nmembers::Vector{Member}: Ordered list of members.\n\n\nExamples\njulia&gt; r = Relation(id=1, tags=Dict(\"type\" =&gt; \"multipolygon\"),\n               members=[Member(type=\"way\", ref=100, role=\"outer\")])\n\n\n\n\n\n\nWay\n\n\nWay &lt;: Element\nAn OpenStreetMap way (line or polygon feature). Implements GeoInterface.LineStringTrait when geometry data is available (query uses out geom).\n\nFields\n\nid::Int64: OSM way ID.\ntags::Dict{String,String}: Key-value tags.\nnode_ids::Vector{Int64}: Ordered list of constituent node IDs.\ngeometry::Vector{LatLon}: Coordinates (populated when query uses out geom).\n\n\nExamples\njulia&gt; w = Way(id=1, tags=Dict(\"highway\" =&gt; \"residential\"), node_ids=[1,2,3],\n               geometry=[LatLon(40.0,-74.0), LatLon(40.1,-74.1), LatLon(40.2,-74.2)])",
     "crumbs": [
       "API",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>API</span>"
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>API</span>"
     ]
   },
   {
@@ -139,7 +282,7 @@
     "text": "Functions\n\nbbox_string\n\n\nbbox_string(ext::Extent) -&gt; String\nConvert an Extents.Extent to an Overpass bbox string \"(south,west,north,east)\".\n\nExamples\njulia&gt; bbox_string(Extent(X=(-79.1, -78.8), Y=(35.9, 36.1)))\n\"(35.9,-79.1,36.1,-78.8)\"\n\n\n\n\n\nnodes\n\n\nnodes(response::OverpassResponse) -&gt; Vector{Node}\nReturn all Node elements from an OverpassResponse.\n\n\n\n\nquery\n\n\nquery(ql::String; bbox=nothing, endpoint=DEFAULT_ENDPOINT) -&gt; OverpassResponse\nExecute an Overpass QL query and return the parsed response.\n[out:json] is automatically prepended if not already present in the query.\nIf bbox is provided as an Extents.Extent, a global [bbox:south,west,north,east] setting is prepended to the query, applying the bounding box to all statements.\n\nExamples\njulia&gt; using Extents\n\njulia&gt; r = query(\"node[amenity=cafe]; out geom;\",\n                  bbox=Extent(X=(-79.1, -78.8), Y=(35.9, 36.1)))\n\njulia&gt; r = query(\"node[amenity=cafe](35.9,-79.1,36.1,-78.8); out geom;\")\n\n\n\n\n\nrelations\n\n\nrelations(response::OverpassResponse) -&gt; Vector{Relation}\nReturn all Relation elements from an OverpassResponse.\n\n\n\n\nways\n\n\nways(response::OverpassResponse) -&gt; Vector{Way}\nReturn all Way elements from an OverpassResponse.",
     "crumbs": [
       "API",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>API</span>"
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>API</span>"
     ]
   },
   {
@@ -150,7 +293,7 @@
     "text": "Constants\n\nDEFAULT_ENDPOINT\n\n\nString(s::AbstractString)\nCreate a new String from an existing AbstractString.\nString(v::AbstractVector{UInt8})\nCreate a new String object using the data buffer from byte vector v. If v is a Vector{UInt8} it will be truncated to zero length and future modification of v cannot affect the contents of the resulting string. To avoid truncation of Vector{UInt8} data, use String(copy(v)); for other AbstractVector types, String(v) already makes a copy.\nWhen possible, the memory of v will be used without copying when the String object is created. This is guaranteed to be the case for byte vectors returned by take! on a writable IOBuffer and by calls to read(io, nb). This allows zero-copy conversion of I/O data to strings. In other cases, Vector{UInt8} data may be copied, but v is truncated anyway to guarantee consistent behavior.\nString &lt;: AbstractString\nThe default string type in Julia, used by e.g. string literals.\nStrings are immutable sequences of Chars. A String is stored internally as a contiguous byte array, and while they are interpreted as being UTF-8 encoded, they can be composed of any byte sequence. Use isvalid to validate that the underlying byte sequence is valid as UTF-8.\nX509Name to string.",
     "crumbs": [
       "API",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>API</span>"
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>API</span>"
     ]
   },
   {
@@ -161,7 +304,7 @@
     "text": "Unreleased",
     "crumbs": [
       "Reference",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Changelog</span>"
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Changelog</span>"
     ]
   }
 ]

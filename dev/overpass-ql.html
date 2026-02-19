@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Changelog – OverpassAPI.jl</title>
+<title>Overpass QL – OverpassAPI.jl</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -30,8 +65,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./coverage.html" rel="next">
-<link href="./api.html" rel="prev">
+<link href="./api.html" rel="next">
+<link href="./getting-started.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
@@ -285,7 +320,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./changelog.html">Reference</a></li><li class="breadcrumb-item"><a href="./changelog.html"><span class="chapter-title">Changelog</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Docs</a></li><li class="breadcrumb-item"><a href="./overpass-ql.html"><span class="chapter-title">Overpass QL</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -326,7 +361,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./overpass-ql.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Overpass QL</span></a>
+  <a href="./overpass-ql.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Overpass QL</span></a>
   </div>
 </li>
       </ul>
@@ -358,7 +393,7 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./changelog.html" class="sidebar-item-text sidebar-link active"><span class="chapter-title">Changelog</span></a>
+  <a href="./changelog.html" class="sidebar-item-text sidebar-link"><span class="chapter-title">Changelog</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -378,7 +413,29 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#unreleased" id="toc-unreleased" class="nav-link active" data-scroll-target="#unreleased">Unreleased</a></li>
+  <li><a href="#query-structure" id="toc-query-structure" class="nav-link active" data-scroll-target="#query-structure">Query Structure</a></li>
+  <li><a href="#element-types" id="toc-element-types" class="nav-link" data-scroll-target="#element-types">Element Types</a></li>
+  <li><a href="#tag-filters" id="toc-tag-filters" class="nav-link" data-scroll-target="#tag-filters">Tag Filters</a></li>
+  <li><a href="#bounding-boxes" id="toc-bounding-boxes" class="nav-link" data-scroll-target="#bounding-boxes">Bounding Boxes</a></li>
+  <li><a href="#area-searches" id="toc-area-searches" class="nav-link" data-scroll-target="#area-searches">Area Searches</a></li>
+  <li><a href="#radius-searches" id="toc-radius-searches" class="nav-link" data-scroll-target="#radius-searches">Radius Searches</a></li>
+  <li><a href="#unions" id="toc-unions" class="nav-link" data-scroll-target="#unions">Unions</a></li>
+  <li><a href="#recursion" id="toc-recursion" class="nav-link" data-scroll-target="#recursion">Recursion</a></li>
+  <li><a href="#output-statements" id="toc-output-statements" class="nav-link" data-scroll-target="#output-statements">Output Statements</a>
+  <ul class="collapse">
+  <li><a href="#verbosity" id="toc-verbosity" class="nav-link" data-scroll-target="#verbosity">Verbosity</a></li>
+  <li><a href="#geometry-modifiers" id="toc-geometry-modifiers" class="nav-link" data-scroll-target="#geometry-modifiers">Geometry Modifiers</a></li>
+  <li><a href="#sort-and-limit" id="toc-sort-and-limit" class="nav-link" data-scroll-target="#sort-and-limit">Sort and Limit</a></li>
+  </ul></li>
+  <li><a href="#global-settings" id="toc-global-settings" class="nav-link" data-scroll-target="#global-settings">Global Settings</a></li>
+  <li><a href="#common-patterns" id="toc-common-patterns" class="nav-link" data-scroll-target="#common-patterns">Common Patterns</a>
+  <ul class="collapse">
+  <li><a href="#all-cafes-in-a-city" id="toc-all-cafes-in-a-city" class="nav-link" data-scroll-target="#all-cafes-in-a-city">All cafes in a city</a></li>
+  <li><a href="#buildings-in-a-bounding-box-with-full-geometry" id="toc-buildings-in-a-bounding-box-with-full-geometry" class="nav-link" data-scroll-target="#buildings-in-a-bounding-box-with-full-geometry">Buildings in a bounding box (with full geometry)</a></li>
+  <li><a href="#count-elements" id="toc-count-elements" class="nav-link" data-scroll-target="#count-elements">Count elements</a></li>
+  <li><a href="#named-elements-matching-a-pattern" id="toc-named-elements-matching-a-pattern" class="nav-link" data-scroll-target="#named-elements-matching-a-pattern">Named elements matching a pattern</a></li>
+  </ul></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading">Further Reading</a></li>
   </ul>
 </nav>
     </div>
@@ -386,9 +443,9 @@ ul.task-list li input[type="checkbox"] {
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./changelog.html">Reference</a></li><li class="breadcrumb-item"><a href="./changelog.html"><span class="chapter-title">Changelog</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Docs</a></li><li class="breadcrumb-item"><a href="./overpass-ql.html"><span class="chapter-title">Overpass QL</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-title">Changelog</span></h1>
+<h1 class="title"><span class="chapter-title">Overpass QL</span></h1>
 </div>
 
 
@@ -405,8 +462,343 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="unreleased" class="level2">
-<h2 class="anchored" data-anchor-id="unreleased">Unreleased</h2>
+<p><a href="https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL">Overpass QL</a> is the query language used by the <a href="https://overpass-api.de/">Overpass API</a> to retrieve OpenStreetMap data. This page covers the most important concepts for writing queries with OverpassAPI.jl.</p>
+<section id="query-structure" class="level2">
+<h2 class="anchored" data-anchor-id="query-structure">Query Structure</h2>
+<p>Every Overpass QL query is a sequence of <strong>statements</strong> separated by semicolons. A typical query looks like:</p>
+<pre><code>[out:json][timeout:25];
+node[amenity=cafe](35.9,-79.1,36.1,-78.8);
+out geom;</code></pre>
+<ul>
+<li><strong>Settings</strong> (in square brackets) control output format, timeout, etc.</li>
+<li><strong>Query statements</strong> select elements from the database.</li>
+<li><strong>Output statements</strong> (<code>out</code>) control what data is returned.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>OverpassAPI.query()</code> automatically prepends <code>[out:json]</code> if it’s not already present.</p>
+</div>
+</div>
+</section>
+<section id="element-types" class="level2">
+<h2 class="anchored" data-anchor-id="element-types">Element Types</h2>
+<p>OpenStreetMap has three fundamental element types:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 21%">
+<col style="width: 46%">
+<col style="width: 32%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong><code>node</code></strong></td>
+<td>A single point (lat/lon)</td>
+<td>A bench, a cafe, a traffic light</td>
+</tr>
+<tr class="even">
+<td><strong><code>way</code></strong></td>
+<td>An ordered list of nodes</td>
+<td>A road, a building outline, a river</td>
+</tr>
+<tr class="odd">
+<td><strong><code>relation</code></strong></td>
+<td>A group of nodes, ways, or other relations</td>
+<td>A bus route, a multipolygon, a boundary</td>
+</tr>
+</tbody>
+</table>
+<p>Use <code>nwr</code> as shorthand to query all three at once:</p>
+<pre><code>nwr[amenity=cafe](bbox);</code></pre>
+</section>
+<section id="tag-filters" class="level2">
+<h2 class="anchored" data-anchor-id="tag-filters">Tag Filters</h2>
+<p>Tags are key-value pairs on elements. Filters go in square brackets:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Filter</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>[key=value]</code></td>
+<td>Exact match</td>
+</tr>
+<tr class="even">
+<td><code>[key!=value]</code></td>
+<td>Not equal</td>
+</tr>
+<tr class="odd">
+<td><code>[key]</code></td>
+<td>Key exists (any value)</td>
+</tr>
+<tr class="even">
+<td><code>[!key]</code></td>
+<td>Key does not exist</td>
+</tr>
+<tr class="odd">
+<td><code>[key~"regex"]</code></td>
+<td>Value matches regex</td>
+</tr>
+<tr class="even">
+<td><code>[key~"regex",i]</code></td>
+<td>Case-insensitive regex</td>
+</tr>
+<tr class="odd">
+<td><code>["key"~"regex"]</code></td>
+<td>Quoted keys (for special characters)</td>
+</tr>
+</tbody>
+</table>
+<p>Multiple filters are combined with AND:</p>
+<pre><code>node[amenity=cafe][cuisine=coffee](bbox);</code></pre>
+</section>
+<section id="bounding-boxes" class="level2">
+<h2 class="anchored" data-anchor-id="bounding-boxes">Bounding Boxes</h2>
+<p>Bounding boxes restrict the geographic area. The format is <code>(south, west, north, east)</code>:</p>
+<pre><code>node[amenity=cafe](35.9,-79.1,36.1,-78.8);</code></pre>
+<p>With OverpassAPI.jl, you can use <code>Extents.Extent</code> instead of formatting the bbox manually:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">OverpassAPI</span>, <span class="bu">Extents</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="fu">query</span>(<span class="st">"node[amenity=cafe]; out geom;"</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>          bbox<span class="op">=</span><span class="fu">Extent</span>(X<span class="op">=</span>(<span class="op">-</span><span class="fl">79.1</span>, <span class="op">-</span><span class="fl">78.8</span>), Y<span class="op">=</span>(<span class="fl">35.9</span>, <span class="fl">36.1</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>You can also set a <strong>global bounding box</strong> that applies to all statements:</p>
+<pre><code>[bbox:35.9,-79.1,36.1,-78.8];
+node[amenity=cafe];
+out;</code></pre>
+</section>
+<section id="area-searches" class="level2">
+<h2 class="anchored" data-anchor-id="area-searches">Area Searches</h2>
+<p>Search within a named area (city, country, etc.) using <code>area</code>:</p>
+<pre><code>area[name="Durham"]-&gt;.searchArea;
+node[amenity=cafe](area.searchArea);
+out geom;</code></pre>
+<p>The <code>-&gt;.searchArea</code> syntax saves the result to a named set that later statements can reference.</p>
+</section>
+<section id="radius-searches" class="level2">
+<h2 class="anchored" data-anchor-id="radius-searches">Radius Searches</h2>
+<p>Find elements within a radius (in meters) around a point:</p>
+<pre><code>node[amenity=pharmacy](around:1000,36.0,-78.9);
+out geom;</code></pre>
+</section>
+<section id="unions" class="level2">
+<h2 class="anchored" data-anchor-id="unions">Unions</h2>
+<p>Combine multiple queries with a union block <code>(...)</code>:</p>
+<pre><code>(
+  node[amenity=cafe](bbox);
+  node[amenity=restaurant](bbox);
+);
+out geom;</code></pre>
+</section>
+<section id="recursion" class="level2">
+<h2 class="anchored" data-anchor-id="recursion">Recursion</h2>
+<p>Ways are built from nodes, and relations from ways/nodes. Use recurse operators to resolve these references:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Operator</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>&gt;</code></td>
+<td>Recurse down (get member nodes of ways, members of relations)</td>
+</tr>
+<tr class="even">
+<td><code>&gt;&gt;</code></td>
+<td>Recurse down recursively</td>
+</tr>
+<tr class="odd">
+<td><code>&lt;</code></td>
+<td>Recurse up (get parent ways/relations)</td>
+</tr>
+<tr class="even">
+<td><code>&lt;&lt;</code></td>
+<td>Recurse up recursively</td>
+</tr>
+</tbody>
+</table>
+<p>A common pattern to get ways <strong>and</strong> their constituent nodes:</p>
+<pre><code>way[highway=primary](bbox);
+(._;&gt;;);
+out body;</code></pre>
+<p>The <code>(._;&gt;;)</code> idiom means: take the current result set (<code>._</code>) and union it with all its child elements (<code>&gt;</code>).</p>
+</section>
+<section id="output-statements" class="level2">
+<h2 class="anchored" data-anchor-id="output-statements">Output Statements</h2>
+<p>The <code>out</code> statement controls what data is returned:</p>
+<pre><code>out [verbosity] [geometry] [sort] [limit];</code></pre>
+<section id="verbosity" class="level3">
+<h3 class="anchored" data-anchor-id="verbosity">Verbosity</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Level</th>
+<th>Included Data</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>ids</code></td>
+<td>Type and ID only</td>
+</tr>
+<tr class="even">
+<td><code>skel</code></td>
+<td>IDs + coordinates (nodes) / node refs (ways)</td>
+</tr>
+<tr class="odd">
+<td><code>body</code></td>
+<td><strong>(default)</strong> IDs, coordinates, node refs, tags</td>
+</tr>
+<tr class="even">
+<td><code>tags</code></td>
+<td>IDs + tags only</td>
+</tr>
+<tr class="odd">
+<td><code>meta</code></td>
+<td>Everything in <code>body</code> + version, timestamp, user</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="geometry-modifiers" class="level3">
+<h3 class="anchored" data-anchor-id="geometry-modifiers">Geometry Modifiers</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Modifier</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><em>(none)</em></td>
+<td>Nodes have lat/lon; ways have node ID refs only</td>
+</tr>
+<tr class="even">
+<td><code>geom</code></td>
+<td>Full coordinate geometry on all elements</td>
+</tr>
+<tr class="odd">
+<td><code>center</code></td>
+<td>Single center point added to ways/relations</td>
+</tr>
+<tr class="even">
+<td><code>bb</code></td>
+<td>Bounding box added to ways/relations</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Use <code>out geom</code> to get coordinate data on Ways and Relations. Without it, Ways only contain node ID references and won’t have GeoInterface geometry support.</p>
+</div>
+</div>
+</section>
+<section id="sort-and-limit" class="level3">
+<h3 class="anchored" data-anchor-id="sort-and-limit">Sort and Limit</h3>
+<ul>
+<li><code>out body qt;</code> — sort by quadtile (faster than default ID sort)</li>
+<li><code>out body 10;</code> — limit to 10 results</li>
+</ul>
+</section>
+</section>
+<section id="global-settings" class="level2">
+<h2 class="anchored" data-anchor-id="global-settings">Global Settings</h2>
+<p>Settings are placed at the beginning of the query in square brackets:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Setting</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>[out:json]</code></td>
+<td><code>xml</code></td>
+<td>Output format</td>
+</tr>
+<tr class="even">
+<td><code>[timeout:N]</code></td>
+<td><code>180</code></td>
+<td>Query timeout in seconds</td>
+</tr>
+<tr class="odd">
+<td><code>[maxsize:N]</code></td>
+<td><code>536870912</code></td>
+<td>Maximum memory in bytes</td>
+</tr>
+<tr class="even">
+<td><code>[bbox:s,w,n,e]</code></td>
+<td><em>(none)</em></td>
+<td>Global bounding box</td>
+</tr>
+<tr class="odd">
+<td><code>[date:"YYYY-MM-DDTHH:MM:SSZ"]</code></td>
+<td><em>(now)</em></td>
+<td>Query historical data</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="common-patterns" class="level2">
+<h2 class="anchored" data-anchor-id="common-patterns">Common Patterns</h2>
+<section id="all-cafes-in-a-city" class="level3">
+<h3 class="anchored" data-anchor-id="all-cafes-in-a-city">All cafes in a city</h3>
+<pre><code>area[name="Durham"]-&gt;.a;
+node[amenity=cafe](area.a);
+out geom;</code></pre>
+</section>
+<section id="buildings-in-a-bounding-box-with-full-geometry" class="level3">
+<h3 class="anchored" data-anchor-id="buildings-in-a-bounding-box-with-full-geometry">Buildings in a bounding box (with full geometry)</h3>
+<pre><code>way[building](35.99,-78.91,36.00,-78.90);
+out geom;</code></pre>
+</section>
+<section id="count-elements" class="level3">
+<h3 class="anchored" data-anchor-id="count-elements">Count elements</h3>
+<pre><code>node[amenity=cafe](35.9,-79.1,36.1,-78.8);
+out count;</code></pre>
+</section>
+<section id="named-elements-matching-a-pattern" class="level3">
+<h3 class="anchored" data-anchor-id="named-elements-matching-a-pattern">Named elements matching a pattern</h3>
+<pre><code>node["name"~"^Starbucks",i](35.9,-79.1,36.1,-78.8);
+out geom;</code></pre>
+</section>
+</section>
+<section id="further-reading" class="level2">
+<h2 class="anchored" data-anchor-id="further-reading">Further Reading</h2>
+<ul>
+<li><a href="https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL">Overpass QL Reference</a> — full language specification</li>
+<li><a href="https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_API_by_Example">Overpass API by Example</a> — cookbook-style examples</li>
+<li><a href="https://overpass-turbo.eu/">Overpass Turbo</a> — interactive query editor with map preview</li>
+</ul>
 
 
 </section>
@@ -827,13 +1219,13 @@ ul.task-list li input[type="checkbox"] {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./api.html" class="pagination-link" aria-label="API">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">API</span></span>
+      <a href="./getting-started.html" class="pagination-link" aria-label="Getting Started">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-title">Getting Started</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./coverage.html" class="pagination-link" aria-label="Coverage">
-        <span class="nav-page-text"><span class="chapter-title">Coverage</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./api.html" class="pagination-link" aria-label="API">
+        <span class="nav-page-text"><span class="chapter-title">API</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
