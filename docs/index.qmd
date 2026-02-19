@@ -7,7 +7,7 @@ Welcome to the documentation for **OverpassAPI.jl**.
 
 ## Overview
 
-OverpassAPI.jl is a Julia interface to the [Overpass API](https://overpass-api.de/) for querying OpenStreetMap data.
+OverpassAPI.jl is a Julia interface to the [Overpass API](https://overpass-api.de/) for querying [OpenStreetMap](https://www.openstreetmap.org/) data.  Results are returned as typed Julia structs that implement [GeoInterface.jl](https://github.com/JuliaGeo/GeoInterface.jl) traits for interoperability with the Julia geospatial ecosystem.
 
 ## Installation
 
@@ -18,6 +18,14 @@ Pkg.add("OverpassAPI")
 
 ## Quickstart
 
-```{julia}
-println("Hello, World!")
+```julia
+using OverpassAPI
+
+# Query cafes in Durham, NC
+r = query("node[amenity=cafe](35.9,-79.1,36.1,-78.8); out;")
+
+# Access elements
+for n in nodes(r)
+    println(n.tags["name"])
+end
 ```

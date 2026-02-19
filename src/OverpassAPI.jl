@@ -1,60 +1,369 @@
 module OverpassAPI
 
-export greet, Config, transform, DEFAULT_GREETING
+using HTTP
+using JSON3
+using GeoInterface
+
+const GI = GeoInterface
+
+export query, Node, Way, Relation, Member, LatLon, OverpassResponse,
+    nodes, ways, relations, DEFAULT_ENDPOINT
+
+#--------------------------------------------------------------------------------# Constants
+#--------------------------------------------------------------------------------
 
 """
-    Config
+    DEFAULT_ENDPOINT
 
-Configuration for the package.
-
-# Fields
-- `name::String`: The name to use in greetings.
-- `verbose::Bool`: Whether to print extra information.
+The default Overpass API endpoint: `"https://overpass-api.de/api/interpreter"`.
 """
-struct Config
-    name::String
-    verbose::Bool
+const DEFAULT_ENDPOINT = "https://overpass-api.de/api/interpreter"
+
+#--------------------------------------------------------------------------------# Types
+#--------------------------------------------------------------------------------
+
+"""
+    LatLon(lat, lon)
+
+A lightweight latitude/longitude coordinate pair.  Implements `GeoInterface.PointTrait`.
+
+### Examples
+```julia
+julia> p = LatLon(40.748, -73.985)
+LatLon(40.748, -73.985)
+
+julia> GeoInterface.x(p)
+-73.985
+
+julia> GeoInterface.y(p)
+40.748
+```
+"""
+@kwdef struct LatLon
+    lat::Float64
+    lon::Float64
 end
 
 """
-    greet()
-    greet(name::String)
+    Node
 
-Return a greeting string. If `name` is provided, greet that person.
+An OpenStreetMap node (point feature).  Implements `GeoInterface.PointTrait`.
 
-### Examples
-```julia
-julia> greet()
-"Hello from OverpassAPI!"
-
-julia> greet("Julia")
-"Hello, Julia!"
-```
-"""
-greet() = "Hello from OverpassAPI!"
-greet(name::String) = "Hello, $name!"
-
-"""
-    transform(x::AbstractVector; scale=1.0)
-
-Apply a transformation to `x`, scaling each element by `scale`.
+# Fields
+- `id::Int64`: OSM node ID.
+- `lat::Float64`: Latitude.
+- `lon::Float64`: Longitude.
+- `tags::Dict{String,String}`: Key-value tags.
 
 ### Examples
 ```julia
-julia> transform([1, 2, 3]; scale=2.0)
-3-element Vector{Float64}:
- 2.0
- 4.0
- 6.0
+julia> n = Node(id=1, lat=40.748, lon=-73.985, tags=Dict("name" => "Example"))
+Node(1, 40.748, -73.985, Dict("name" => "Example"))
 ```
 """
-transform(x::AbstractVector; scale=1.0) = x .* scale
+@kwdef struct Node
+    id::Int64
+    lat::Float64
+    lon::Float64
+    tags::Dict{String,String} = Dict{String,String}()
+end
 
 """
-    DEFAULT_GREETING
+    Member
 
-The default greeting string used by [`greet`](@ref).
+A member of an OSM relation.
+
+# Fields
+- `type::String`: Element type (`"node"`, `"way"`, or `"relation"`).
+- `ref::Int64`: OSM ID of the referenced element.
+- `role::String`: Role within the relation (e.g. `"outer"`, `"inner"`, `"stop"`).
+- `geometry::Vector{LatLon}`: Coordinates (populated when query uses `out geom`).
+
+### Examples
+```julia
+julia> m = Member(type="way", ref=123, role="outer")
+Member("way", 123, "outer", LatLon[])
+```
 """
-const DEFAULT_GREETING = "Hello from OverpassAPI!"
+@kwdef struct Member
+    type::String
+    ref::Int64
+    role::String = ""
+    geometry::Vector{LatLon} = LatLon[]
+end
+
+"""
+    Way
+
+An OpenStreetMap way (line or polygon feature).  Implements `GeoInterface.LineStringTrait`
+when geometry data is available (query uses `out geom`).
+
+# Fields
+- `id::Int64`: OSM way ID.
+- `tags::Dict{String,String}`: Key-value tags.
+- `node_ids::Vector{Int64}`: Ordered list of constituent node IDs.
+- `geometry::Vector{LatLon}`: Coordinates (populated when query uses `out geom`).
+
+### Examples
+```julia
+julia> w = Way(id=1, tags=Dict("highway" => "residential"), node_ids=[1,2,3],
+               geometry=[LatLon(40.0,-74.0), LatLon(40.1,-74.1), LatLon(40.2,-74.2)])
+```
+"""
+@kwdef struct Way
+    id::Int64
+    tags::Dict{String,String} = Dict{String,String}()
+    node_ids::Vector{Int64} = Int64[]
+    geometry::Vector{LatLon} = LatLon[]
+end
+
+"""
+    Relation
+
+An OpenStreetMap relation (a group of elements with roles).
+
+# Fields
+- `id::Int64`: OSM relation ID.
+- `tags::Dict{String,String}`: Key-value tags.
+- `members::Vector{Member}`: Ordered list of members.
+
+### Examples
+```julia
+julia> r = Relation(id=1, tags=Dict("type" => "multipolygon"),
+               members=[Member(type="way", ref=100, role="outer")])
+```
+"""
+@kwdef struct Relation
+    id::Int64
+    tags::Dict{String,String} = Dict{String,String}()
+    members::Vector{Member} = Member[]
+end
+
+"""
+    Element
+
+Union type for all OSM element types: `Union{Node, Way, Relation}`.
+"""
+const Element = Union{Node, Way, Relation}
+
+"""
+    OverpassResponse
+
+The parsed response from an Overpass API query.
+
+# Fields
+- `version::Float64`: API version (typically `0.6`).
+- `generator::String`: Generator string from the API.
+- `timestamp::String`: OSM data timestamp.
+- `elements::Vector{Element}`: All returned elements.
+
+### Examples
+```julia
+julia> r = query("node[amenity=cafe](35.9,-79.1,36.1,-78.8); out geom;")
+
+julia> nodes(r)  # filter to just Node elements
+
+julia> ways(r)   # filter to just Way elements
+```
+"""
+@kwdef struct OverpassResponse
+    version::Float64 = 0.6
+    generator::String = ""
+    timestamp::String = ""
+    elements::Vector{Element} = Element[]
+end
+
+#--------------------------------------------------------------------------------# Accessors
+#--------------------------------------------------------------------------------
+
+"""
+    nodes(response::OverpassResponse) -> Vector{Node}
+
+Return all `Node` elements from an `OverpassResponse`.
+"""
+nodes(r::OverpassResponse) = Node[e for e in r.elements if e isa Node]
+
+"""
+    ways(response::OverpassResponse) -> Vector{Way}
+
+Return all `Way` elements from an `OverpassResponse`.
+"""
+ways(r::OverpassResponse) = Way[e for e in r.elements if e isa Way]
+
+"""
+    relations(response::OverpassResponse) -> Vector{Relation}
+
+Return all `Relation` elements from an `OverpassResponse`.
+"""
+relations(r::OverpassResponse) = Relation[e for e in r.elements if e isa Relation]
+
+#--------------------------------------------------------------------------------# JSON Parsing
+#--------------------------------------------------------------------------------
+
+function parse_tags(obj)::Dict{String,String}
+    haskey(obj, :tags) ? Dict{String,String}(String(k) => String(v) for (k, v) in pairs(obj.tags)) : Dict{String,String}()
+end
+
+function parse_latlon(obj)::LatLon
+    LatLon(lat=Float64(obj.lat), lon=Float64(obj.lon))
+end
+
+function parse_geometry(obj)::Vector{LatLon}
+    haskey(obj, :geometry) ? LatLon[parse_latlon(p) for p in obj.geometry] : LatLon[]
+end
+
+function parse_node(obj)::Node
+    Node(
+        id = Int64(obj.id),
+        lat = Float64(obj.lat),
+        lon = Float64(obj.lon),
+        tags = parse_tags(obj),
+    )
+end
+
+function parse_member(obj)::Member
+    Member(
+        type = String(obj.type),
+        ref = Int64(obj.ref),
+        role = haskey(obj, :role) ? String(obj.role) : "",
+        geometry = parse_geometry(obj),
+    )
+end
+
+function parse_way(obj)::Way
+    Way(
+        id = Int64(obj.id),
+        tags = parse_tags(obj),
+        node_ids = haskey(obj, :nodes) ? Int64[Int64(n) for n in obj.nodes] : Int64[],
+        geometry = parse_geometry(obj),
+    )
+end
+
+function parse_relation(obj)::Relation
+    Relation(
+        id = Int64(obj.id),
+        tags = parse_tags(obj),
+        members = haskey(obj, :members) ? Member[parse_member(m) for m in obj.members] : Member[],
+    )
+end
+
+function parse_element(obj)::Element
+    t = String(obj.type)
+    if t == "node"
+        parse_node(obj)
+    elseif t == "way"
+        parse_way(obj)
+    elseif t == "relation"
+        parse_relation(obj)
+    else
+        error("Unknown OSM element type: $t")
+    end
+end
+
+function parse_response(json::JSON3.Object)::OverpassResponse
+    osm3s = haskey(json, :osm3s) ? json.osm3s : nothing
+    OverpassResponse(
+        version = haskey(json, :version) ? Float64(json.version) : 0.6,
+        generator = haskey(json, :generator) ? String(json.generator) : "",
+        timestamp = !isnothing(osm3s) && haskey(osm3s, :timestamp_osm_base) ? String(osm3s.timestamp_osm_base) : "",
+        elements = Element[parse_element(e) for e in json.elements],
+    )
+end
+
+#--------------------------------------------------------------------------------# Query
+#--------------------------------------------------------------------------------
+
+"""
+    query(ql::String; endpoint=DEFAULT_ENDPOINT) -> OverpassResponse
+
+Execute an Overpass QL query and return the parsed response.
+
+`[out:json]` is automatically prepended if not already present in the query.
+
+### Examples
+```julia
+julia> r = query("node[amenity=cafe](35.9,-79.1,36.1,-78.8); out geom;")
+
+julia> length(r.elements)
+42
+
+julia> first(nodes(r))
+Node(265610373, 36.0158, -78.919, Dict("amenity" => "cafe", ...))
+```
+"""
+function query(ql::String; endpoint::String=DEFAULT_ENDPOINT)
+    q = contains(ql, "[out:json]") ? ql : "[out:json];" * ql
+    resp = HTTP.post(endpoint, [], HTTP.Form(Dict("data" => q)))
+    if resp.status != 200
+        error("Overpass API error (HTTP $(resp.status)): $(String(resp.body))")
+    end
+    json = JSON3.read(resp.body)
+    parse_response(json)
+end
+
+#--------------------------------------------------------------------------------# GeoInterface
+#--------------------------------------------------------------------------------
+
+# --- LatLon ---
+GI.isgeometry(::Type{LatLon}) = true
+GI.geomtrait(::LatLon) = GI.PointTrait()
+GI.ncoord(::GI.PointTrait, ::LatLon) = 2
+GI.getcoord(::GI.PointTrait, p::LatLon, i::Integer) = i == 1 ? p.lon : p.lat
+
+# --- Node ---
+GI.isgeometry(::Type{Node}) = true
+GI.geomtrait(::Node) = GI.PointTrait()
+GI.ncoord(::GI.PointTrait, ::Node) = 2
+GI.getcoord(::GI.PointTrait, n::Node, i::Integer) = i == 1 ? n.lon : n.lat
+
+# --- Way ---
+GI.isgeometry(::Type{Way}) = true
+GI.geomtrait(w::Way) = isempty(w.geometry) ? nothing : GI.LineStringTrait()
+GI.ncoord(::GI.LineStringTrait, ::Way) = 2
+GI.ngeom(::GI.LineStringTrait, w::Way) = length(w.geometry)
+GI.getgeom(::GI.LineStringTrait, w::Way, i::Integer) = w.geometry[i]
+
+#--------------------------------------------------------------------------------# Show Methods
+#--------------------------------------------------------------------------------
+
+function Base.show(io::IO, p::LatLon)
+    print(io, "LatLon($(p.lat), $(p.lon))")
+end
+
+function Base.show(io::IO, n::Node)
+    print(io, "Node($(n.id), $(n.lat), $(n.lon)")
+    isempty(n.tags) || print(io, ", ", length(n.tags), " tags")
+    print(io, ")")
+end
+
+function Base.show(io::IO, w::Way)
+    print(io, "Way($(w.id)")
+    isempty(w.tags) || print(io, ", ", length(w.tags), " tags")
+    isempty(w.node_ids) || print(io, ", ", length(w.node_ids), " nodes")
+    isempty(w.geometry) || print(io, ", ", length(w.geometry), " coords")
+    print(io, ")")
+end
+
+function Base.show(io::IO, m::Member)
+    print(io, "Member($(m.type), ref=$(m.ref), role=$(repr(m.role)))")
+end
+
+function Base.show(io::IO, r::Relation)
+    print(io, "Relation($(r.id)")
+    isempty(r.tags) || print(io, ", ", length(r.tags), " tags")
+    isempty(r.members) || print(io, ", ", length(r.members), " members")
+    print(io, ")")
+end
+
+function Base.show(io::IO, r::OverpassResponse)
+    nn = count(e -> e isa Node, r.elements)
+    nw = count(e -> e isa Way, r.elements)
+    nr = count(e -> e isa Relation, r.elements)
+    parts = String[]
+    nn > 0 && push!(parts, "$nn nodes")
+    nw > 0 && push!(parts, "$nw ways")
+    nr > 0 && push!(parts, "$nr relations")
+    print(io, "OverpassResponse(", join(parts, ", "), ")")
+end
 
 end # module

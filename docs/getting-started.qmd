@@ -1,11 +1,106 @@
-# Getting Started {.unnumbered}
+---
+title: "Getting Started"
+engine: julia
+---
+
+```{julia}
+#| echo: false
+#| output: false
+using OverpassAPI
+using GeoInterface
+const GI = GeoInterface
+```
 
 ## Basic Usage
 
+Use [`query`](#query) to send an [Overpass QL](https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL) query to the Overpass API. Results are returned as an [`OverpassResponse`](#overpassresponse) containing typed elements.
+
 ```julia
 using OverpassAPI
+
+r = query("node[amenity=cafe](35.9,-79.1,36.1,-78.8); out;")
 ```
 
-## Examples
+> `[out:json]` is automatically prepended if not already present.
 
-*TODO: Add examples here.*
+## Filtering Elements
+
+Use the convenience functions to filter by element type:
+
+```julia
+nodes(r)      # Vector{Node}
+ways(r)       # Vector{Way}
+relations(r)  # Vector{Relation}
+```
+
+## Accessing Tags
+
+Every element has a `tags` field (a `Dict{String,String}`):
+
+```julia
+n = first(nodes(r))
+n.tags["amenity"]  # "cafe"
+n.tags["name"]     # "Joe Van Gogh"
+```
+
+## Getting Geometry with `out geom`
+
+To get full coordinate geometry on Ways and Relations, use `out geom` in your query:
+
+```julia
+r = query("""
+    way[building](35.99,-78.91,36.00,-78.90);
+    out geom;
+""")
+
+w = first(ways(r))
+w.geometry  # Vector{LatLon} with coordinates
+```
+
+Without `out geom`, Ways only contain node ID references (`node_ids`) and no coordinate data.
+
+## GeoInterface Integration
+
+All geometry types implement [GeoInterface.jl](https://github.com/JuliaGeo/GeoInterface.jl) traits:
+
+- **`Node`** and **`LatLon`** implement `PointTrait`
+- **`Way`** implements `LineStringTrait` (when geometry is available)
+
+```julia
+using GeoInterface
+const GI = GeoInterface
+
+n = Node(id=1, lat=40.748, lon=-73.985)
+GI.x(n)  # -73.985 (longitude)
+GI.y(n)  # 40.748  (latitude)
+```
+
+This means OverpassAPI types work with any package that accepts GeoInterface geometries.
+
+## Overpass QL Tips
+
+**Bounding box format**: `(south, west, north, east)`
+
+**Search by area name:**
+```
+area[name="Durham"]->.a;
+node[amenity=cafe](area.a);
+out;
+```
+
+**Union multiple types:**
+```
+(
+  node[amenity=restaurant](bbox);
+  way[amenity=restaurant](bbox);
+);
+out geom;
+```
+
+**Limit results:**
+```
+node[amenity=cafe](35.9,-79.1,36.1,-78.8);
+out 10;
+```
+
+See the [Overpass QL documentation](https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL) for the full query language reference.
