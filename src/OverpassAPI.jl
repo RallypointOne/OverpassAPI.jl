@@ -3,10 +3,11 @@ module OverpassAPI
 using HTTP
 using JSON3
 using GeoInterface
+using Extents: Extents, Extent
 
 const GI = GeoInterface
 
-export query, Node, Way, Relation, Member, LatLon, OverpassResponse,
+export query, bbox_string, Node, Way, Relation, Member, LatLon, OverpassResponse,
     nodes, ways, relations, DEFAULT_ENDPOINT
 
 #--------------------------------------------------------------------------------# Constants
@@ -197,6 +198,25 @@ Return all `Relation` elements from an `OverpassResponse`.
 """
 relations(r::OverpassResponse) = Relation[e for e in r.elements if e isa Relation]
 
+# --- Tag access via getindex ---
+Base.getindex(n::Node, key::AbstractString) = n.tags[key]
+Base.getindex(w::Way, key::AbstractString) = w.tags[key]
+Base.getindex(r::Relation, key::AbstractString) = r.tags[key]
+Base.get(n::Node, key::AbstractString, default) = get(n.tags, key, default)
+Base.get(w::Way, key::AbstractString, default) = get(w.tags, key, default)
+Base.get(r::Relation, key::AbstractString, default) = get(r.tags, key, default)
+Base.haskey(n::Node, key::AbstractString) = haskey(n.tags, key)
+Base.haskey(w::Way, key::AbstractString) = haskey(w.tags, key)
+Base.haskey(r::Relation, key::AbstractString) = haskey(r.tags, key)
+Base.keys(n::Node) = keys(n.tags)
+Base.keys(w::Way) = keys(w.tags)
+Base.keys(r::Relation) = keys(r.tags)
+
+# --- OverpassResponse iteration and length ---
+Base.length(r::OverpassResponse) = length(r.elements)
+Base.iterate(r::OverpassResponse, args...) = iterate(r.elements, args...)
+Base.eltype(::Type{OverpassResponse}) = Element
+
 #--------------------------------------------------------------------------------# JSON Parsing
 #--------------------------------------------------------------------------------
 
@@ -274,25 +294,49 @@ end
 #--------------------------------------------------------------------------------
 
 """
-    query(ql::String; endpoint=DEFAULT_ENDPOINT) -> OverpassResponse
+    bbox_string(ext::Extent) -> String
+
+Convert an `Extents.Extent` to an Overpass bbox string `"(south,west,north,east)"`.
+
+### Examples
+```julia
+julia> bbox_string(Extent(X=(-79.1, -78.8), Y=(35.9, 36.1)))
+"(35.9,-79.1,36.1,-78.8)"
+```
+"""
+function bbox_string(ext::Extent)
+    x = ext.X
+    y = ext.Y
+    "($(y[1]),$(x[1]),$(y[2]),$(x[2]))"
+end
+
+"""
+    query(ql::String; bbox=nothing, endpoint=DEFAULT_ENDPOINT) -> OverpassResponse
 
 Execute an Overpass QL query and return the parsed response.
 
 `[out:json]` is automatically prepended if not already present in the query.
 
+If `bbox` is provided as an `Extents.Extent`, a global `[bbox:south,west,north,east]` setting
+is prepended to the query, applying the bounding box to all statements.
+
 ### Examples
 ```julia
+julia> using Extents
+
+julia> r = query("node[amenity=cafe]; out geom;",
+                  bbox=Extent(X=(-79.1, -78.8), Y=(35.9, 36.1)))
+
 julia> r = query("node[amenity=cafe](35.9,-79.1,36.1,-78.8); out geom;")
-
-julia> length(r.elements)
-42
-
-julia> first(nodes(r))
-Node(265610373, 36.0158, -78.919, Dict("amenity" => "cafe", ...))
 ```
 """
-function query(ql::String; endpoint::String=DEFAULT_ENDPOINT)
+function query(ql::String; bbox::Union{Extent, Nothing}=nothing, endpoint::String=DEFAULT_ENDPOINT)
     q = contains(ql, "[out:json]") ? ql : "[out:json];" * ql
+    if !isnothing(bbox)
+        x = bbox.X
+        y = bbox.Y
+        q = "[bbox:$(y[1]),$(x[1]),$(y[2]),$(x[2])];" * q
+    end
     resp = HTTP.post(endpoint, [], HTTP.Form(Dict("data" => q)))
     if resp.status != 200
         error("Overpass API error (HTTP $(resp.status)): $(String(resp.body))")
@@ -322,6 +366,19 @@ GI.geomtrait(w::Way) = isempty(w.geometry) ? nothing : GI.LineStringTrait()
 GI.ncoord(::GI.LineStringTrait, ::Way) = 2
 GI.ngeom(::GI.LineStringTrait, w::Way) = length(w.geometry)
 GI.getgeom(::GI.LineStringTrait, w::Way, i::Integer) = w.geometry[i]
+
+#--------------------------------------------------------------------------------# Extents
+#--------------------------------------------------------------------------------
+
+Extents.extent(p::LatLon) = Extent(X=(p.lon, p.lon), Y=(p.lat, p.lat))
+Extents.extent(n::Node) = Extent(X=(n.lon, n.lon), Y=(n.lat, n.lat))
+
+function Extents.extent(w::Way)
+    isempty(w.geometry) && error("Way $(w.id) has no geometry data. Use `out geom` in your query.")
+    lons = (p.lon for p in w.geometry)
+    lats = (p.lat for p in w.geometry)
+    Extent(X=extrema(lons), Y=extrema(lats))
+end
 
 #--------------------------------------------------------------------------------# Show Methods
 #--------------------------------------------------------------------------------

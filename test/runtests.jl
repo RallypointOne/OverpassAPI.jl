@@ -1,6 +1,7 @@
 using OverpassAPI
 using OverpassAPI: parse_response, LatLon, Node, Way, Relation, Member
 using GeoInterface
+using Extents: Extents, Extent
 using JSON3
 using Test
 
@@ -227,6 +228,64 @@ const MIXED_JSON = JSON3.read("""
         # The actual prepend logic is in query(), tested via contains()
         prepended = "[out:json];" * ql_without
         @test contains(prepended, "[out:json]")
+    end
+
+    @testset "Tag access via getindex" begin
+        n = Node(id=1, lat=0.0, lon=0.0, tags=Dict("name" => "Cafe", "amenity" => "cafe"))
+        @test n["name"] == "Cafe"
+        @test n["amenity"] == "cafe"
+        @test get(n, "name", "?") == "Cafe"
+        @test get(n, "missing", "default") == "default"
+        @test haskey(n, "name")
+        @test !haskey(n, "missing")
+        @test "name" in keys(n)
+
+        w = Way(id=1, tags=Dict("highway" => "residential"))
+        @test w["highway"] == "residential"
+        @test get(w, "nope", "x") == "x"
+
+        r = Relation(id=1, tags=Dict("type" => "route"))
+        @test r["type"] == "route"
+        @test haskey(r, "type")
+    end
+
+    @testset "OverpassResponse iteration and length" begin
+        r = parse_response(MIXED_JSON)
+        @test length(r) == 3
+        @test eltype(typeof(r)) == OverpassAPI.Element
+        collected = collect(r)
+        @test length(collected) == 3
+        @test collected[1] isa Node
+        @test collected[2] isa Way
+        @test collected[3] isa Relation
+    end
+
+    @testset "bbox_string" begin
+        ext = Extent(X=(-79.1, -78.8), Y=(35.9, 36.1))
+        @test bbox_string(ext) == "(35.9,-79.1,36.1,-78.8)"
+    end
+
+    @testset "Extents.extent" begin
+        p = LatLon(40.748, -73.985)
+        ext = Extents.extent(p)
+        @test ext.X == (-73.985, -73.985)
+        @test ext.Y == (40.748, 40.748)
+
+        n = Node(id=1, lat=40.748, lon=-73.985)
+        ext = Extents.extent(n)
+        @test ext.X == (-73.985, -73.985)
+        @test ext.Y == (40.748, 40.748)
+
+        w = Way(id=1, geometry=[
+            LatLon(40.0, -74.0), LatLon(40.1, -73.9), LatLon(40.2, -74.1)
+        ])
+        ext = Extents.extent(w)
+        @test ext.X == (-74.1, -73.9)
+        @test ext.Y == (40.0, 40.2)
+
+        # Way without geometry should error
+        w2 = Way(id=2, node_ids=[1, 2, 3])
+        @test_throws ErrorException Extents.extent(w2)
     end
 
     @testset "Show methods" begin
