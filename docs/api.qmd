@@ -26,9 +26,10 @@ for (kind, label) in [(:type, "Types"), (:function, "Functions"), (:constant, "C
         binding = getfield(OverpassAPI, name)
         doc = string(Docs.doc(binding))
         println("""
-        #### `$name` {#$(lowercase(string(name)))}
-
         ::: {.card .mb-3}
+        ::: {.card-header .api-item-header}
+        #### `$name` {#$(lowercase(string(name)))}
+        :::
         ::: {.card-body}
         $doc
         :::
