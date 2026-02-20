@@ -13,15 +13,72 @@ const GI = GeoInterface
 
 ## Basic Usage
 
-Use [`query`](#query) to send an [Overpass QL](https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL) query to the Overpass API. Results are returned as an [`OverpassResponse`](#overpassresponse) containing typed elements.
+Use [`query`](#query) to send an [Overpass QL](overpass-ql.qmd) query to the Overpass API. Results are returned as an [`OverpassResponse`](#overpassresponse) containing typed elements.
 
 ```julia
 using OverpassAPI
 
-r = query("node[amenity=cafe](35.9,-79.1,36.1,-78.8); out;")
+r = query("node[amenity=cafe](35.9,-79.1,36.1,-78.8); out geom;")
 ```
 
 > `[out:json]` is automatically prepended if not already present.
+
+## Query Builder
+
+The `OQL` object lets you build queries with Julia syntax instead of writing raw Overpass QL strings.
+Use **dot syntax** to select element types and **bracket syntax** to add tag filters:
+
+```{julia}
+#| output: false
+# Keyword syntax (clean, no quotes on keys)
+OQL.node[amenity = "cafe"]
+
+# Multiple filters
+OQL.node[amenity = "cafe", cuisine = "coffee"]
+
+# Regex matching (Julia regex literals)
+OQL.node[name = r"^Starbucks"i]
+
+# Tag exists (positional string)
+OQL.way["building"]
+
+# Mix and chain freely
+OQL.node[amenity = "cafe"]["wifi"]
+```
+
+Pass a `QLStatement` directly to `query`:
+
+```julia
+r = query(OQL.node[amenity = "cafe"],
+          bbox=Extent(X=(-79.1, -78.8), Y=(35.9, 36.1)))
+```
+
+The `out` keyword controls the output mode (default `:geom`):
+
+```julia
+r = query(OQL.way[building = "yes"], bbox=ext, out=:center)
+```
+
+For keys with special characters (e.g. `addr:street`), use the `Pair` syntax:
+
+```julia
+OQL.node["addr:street" => "Main St"]
+```
+
+## Bounding Boxes with `Extents.Extent`
+
+Instead of manually formatting `(south,west,north,east)` strings, pass an `Extents.Extent`
+to the `bbox` keyword:
+
+```julia
+using Extents
+
+ext = Extent(X=(-79.1, -78.8), Y=(35.9, 36.1))
+
+# Works with both raw QL strings and OQL statements
+r = query("node[amenity=cafe]; out geom;", bbox=ext)
+r = query(OQL.node[amenity = "cafe"], bbox=ext)
+```
 
 ## Filtering Elements
 
@@ -33,25 +90,36 @@ ways(r)       # Vector{Way}
 relations(r)  # Vector{Relation}
 ```
 
+`OverpassResponse` is also iterable:
+
+```julia
+length(r)       # total element count
+collect(r)      # Vector{Element}
+for e in r
+    # ...
+end
+```
+
 ## Accessing Tags
 
-Every element has a `tags` field (a `Dict{String,String}`):
+Use bracket syntax directly on elements:
 
 ```julia
 n = first(nodes(r))
-n.tags["amenity"]  # "cafe"
-n.tags["name"]     # "Joe Van Gogh"
+n["amenity"]                    # "cafe"
+n["name"]                       # "Joe Van Gogh"
+get(n, "phone", "unknown")     # safe access with default
+haskey(n, "website")            # check if tag exists
+keys(n)                         # all tag keys
 ```
 
 ## Getting Geometry with `out geom`
 
-To get full coordinate geometry on Ways and Relations, use `out geom` in your query:
+To get full coordinate geometry on Ways and Relations, use `out geom` in your query
+(this is the default when using `OQL`):
 
 ```julia
-r = query("""
-    way[building](35.99,-78.91,36.00,-78.90);
-    out geom;
-""")
+r = query(OQL.way[building = "yes"], bbox=ext)
 
 w = first(ways(r))
 w.geometry  # Vector{LatLon} with coordinates
@@ -75,32 +143,11 @@ GI.x(n)  # -73.985 (longitude)
 GI.y(n)  # 40.748  (latitude)
 ```
 
-This means OverpassAPI types work with any package that accepts GeoInterface geometries.
+`Extents.extent` is implemented for `Node`, `LatLon`, and `Way`:
 
-## Overpass QL Tips
-
-**Bounding box format**: `(south, west, north, east)`
-
-**Search by area name:**
-```
-area[name="Durham"]->.a;
-node[amenity=cafe](area.a);
-out;
+```julia
+using Extents
+Extents.extent(w)  # Extent(X=(-74.1, -73.9), Y=(40.0, 40.2))
 ```
 
-**Union multiple types:**
-```
-(
-  node[amenity=restaurant](bbox);
-  way[amenity=restaurant](bbox);
-);
-out geom;
-```
-
-**Limit results:**
-```
-node[amenity=cafe](35.9,-79.1,36.1,-78.8);
-out 10;
-```
-
-See the [Overpass QL documentation](https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL) for the full query language reference.
+This means OverpassAPI types work with any package in the Julia geospatial ecosystem.
