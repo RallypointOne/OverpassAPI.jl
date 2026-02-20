@@ -79,9 +79,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-c58f986be3ff872790ab570c6d9e49f2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-7c8ba9dac8feea6a77ed63b2e2898d0e.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-c58f986be3ff872790ab570c6d9e49f2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-4ff66e45b39d49436fe97d3fe27b9920.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-7e34ecb6a0e7991f0346b0751d4a7c3f.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-4ff66e45b39d49436fe97d3fe27b9920.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -414,11 +414,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#basic-usage" id="toc-basic-usage" class="nav-link active" data-scroll-target="#basic-usage">Basic Usage</a></li>
+  <li><a href="#query-builder" id="toc-query-builder" class="nav-link" data-scroll-target="#query-builder">Query Builder</a></li>
+  <li><a href="#bounding-boxes-with-extents.extent" id="toc-bounding-boxes-with-extents.extent" class="nav-link" data-scroll-target="#bounding-boxes-with-extents.extent">Bounding Boxes with <code>Extents.Extent</code></a></li>
   <li><a href="#filtering-elements" id="toc-filtering-elements" class="nav-link" data-scroll-target="#filtering-elements">Filtering Elements</a></li>
   <li><a href="#accessing-tags" id="toc-accessing-tags" class="nav-link" data-scroll-target="#accessing-tags">Accessing Tags</a></li>
   <li><a href="#getting-geometry-with-out-geom" id="toc-getting-geometry-with-out-geom" class="nav-link" data-scroll-target="#getting-geometry-with-out-geom">Getting Geometry with <code>out geom</code></a></li>
   <li><a href="#geointerface-integration" id="toc-geointerface-integration" class="nav-link" data-scroll-target="#geointerface-integration">GeoInterface Integration</a></li>
-  <li><a href="#overpass-ql-tips" id="toc-overpass-ql-tips" class="nav-link" data-scroll-target="#overpass-ql-tips">Overpass QL Tips</a></li>
   </ul>
 </nav>
     </div>
@@ -447,38 +448,82 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="basic-usage" class="level2">
 <h2 class="anchored" data-anchor-id="basic-usage">Basic Usage</h2>
-<p>Use <a href="api.html#query"><code>query</code></a> to send an <a href="https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL">Overpass QL</a> query to the Overpass API. Results are returned as an <a href="api.html#overpassresponse"><code>OverpassResponse</code></a> containing typed elements.</p>
+<p>Use <a href="api.html#query"><code>query</code></a> to send an <a href="./overpass-ql.html">Overpass QL</a> query to the Overpass API. Results are returned as an <a href="api.html#overpassresponse"><code>OverpassResponse</code></a> containing typed elements.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">OverpassAPI</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="fu">query</span>(<span class="st">"node[amenity=cafe](35.9,-79.1,36.1,-78.8); out;"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="fu">query</span>(<span class="st">"node[amenity=cafe](35.9,-79.1,36.1,-78.8); out geom;"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <blockquote class="blockquote">
 <p><code>[out:json]</code> is automatically prepended if not already present.</p>
 </blockquote>
 </section>
+<section id="query-builder" class="level2">
+<h2 class="anchored" data-anchor-id="query-builder">Query Builder</h2>
+<p>The <code>OQL</code> object lets you build queries with Julia syntax instead of writing raw Overpass QL strings. Use <strong>dot syntax</strong> to select element types and <strong>bracket syntax</strong> to add tag filters:</p>
+<div id="4" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Keyword syntax (clean, no quotes on keys)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>OQL.node[amenity <span class="op">=</span> <span class="st">"cafe"</span>]</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Multiple filters</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>OQL.node[amenity <span class="op">=</span> <span class="st">"cafe"</span>, cuisine <span class="op">=</span> <span class="st">"coffee"</span>]</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Regex matching (Julia regex literals)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>OQL.node[name <span class="op">=</span> <span class="st">r"^Starbucks"i</span>]</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Tag exists (positional string)</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>OQL.way[<span class="st">"building"</span>]</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Mix and chain freely</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>OQL.node[amenity <span class="op">=</span> <span class="st">"cafe"</span>][<span class="st">"wifi"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Pass a <code>QLStatement</code> directly to <code>query</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="fu">query</span>(OQL.node[amenity <span class="op">=</span> <span class="st">"cafe"</span>],</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>          bbox<span class="op">=</span><span class="fu">Extent</span>(X<span class="op">=</span>(<span class="op">-</span><span class="fl">79.1</span>, <span class="op">-</span><span class="fl">78.8</span>), Y<span class="op">=</span>(<span class="fl">35.9</span>, <span class="fl">36.1</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>out</code> keyword controls the output mode (default <code>:geom</code>):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="fu">query</span>(OQL.way[building <span class="op">=</span> <span class="st">"yes"</span>], bbox<span class="op">=</span>ext, out<span class="op">=:</span>center)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For keys with special characters (e.g.&nbsp;<code>addr:street</code>), use the <code>Pair</code> syntax:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>OQL.node[<span class="st">"addr:street"</span> <span class="op">=&gt;</span> <span class="st">"Main St"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="bounding-boxes-with-extents.extent" class="level2">
+<h2 class="anchored" data-anchor-id="bounding-boxes-with-extents.extent">Bounding Boxes with <code>Extents.Extent</code></h2>
+<p>Instead of manually formatting <code>(south,west,north,east)</code> strings, pass an <code>Extents.Extent</code> to the <code>bbox</code> keyword:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Extents</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>ext <span class="op">=</span> <span class="fu">Extent</span>(X<span class="op">=</span>(<span class="op">-</span><span class="fl">79.1</span>, <span class="op">-</span><span class="fl">78.8</span>), Y<span class="op">=</span>(<span class="fl">35.9</span>, <span class="fl">36.1</span>))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Works with both raw QL strings and OQL statements</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="fu">query</span>(<span class="st">"node[amenity=cafe]; out geom;"</span>, bbox<span class="op">=</span>ext)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="fu">query</span>(OQL.node[amenity <span class="op">=</span> <span class="st">"cafe"</span>], bbox<span class="op">=</span>ext)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
 <section id="filtering-elements" class="level2">
 <h2 class="anchored" data-anchor-id="filtering-elements">Filtering Elements</h2>
 <p>Use the convenience functions to filter by element type:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nodes</span>(r)      <span class="co"># Vector{Node}</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ways</span>(r)       <span class="co"># Vector{Way}</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">relations</span>(r)  <span class="co"># Vector{Relation}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nodes</span>(r)      <span class="co"># Vector{Node}</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ways</span>(r)       <span class="co"># Vector{Way}</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">relations</span>(r)  <span class="co"># Vector{Relation}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>OverpassResponse</code> is also iterable:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(r)       <span class="co"># total element count</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">collect</span>(r)      <span class="co"># Vector{Element}</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="cn">e</span> <span class="kw">in</span> r</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ...</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="cf">end</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="accessing-tags" class="level2">
 <h2 class="anchored" data-anchor-id="accessing-tags">Accessing Tags</h2>
-<p>Every element has a <code>tags</code> field (a <code>Dict{String,String}</code>):</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="fu">first</span>(<span class="fu">nodes</span>(r))</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>n.tags[<span class="st">"amenity"</span>]  <span class="co"># "cafe"</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>n.tags[<span class="st">"name"</span>]     <span class="co"># "Joe Van Gogh"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Use bracket syntax directly on elements:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="fu">first</span>(<span class="fu">nodes</span>(r))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>n[<span class="st">"amenity"</span>]                    <span class="co"># "cafe"</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>n[<span class="st">"name"</span>]                       <span class="co"># "Joe Van Gogh"</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">get</span>(n, <span class="st">"phone"</span>, <span class="st">"unknown"</span>)     <span class="co"># safe access with default</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">haskey</span>(n, <span class="st">"website"</span>)            <span class="co"># check if tag exists</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">keys</span>(n)                         <span class="co"># all tag keys</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="getting-geometry-with-out-geom" class="level2">
 <h2 class="anchored" data-anchor-id="getting-geometry-with-out-geom">Getting Geometry with <code>out geom</code></h2>
-<p>To get full coordinate geometry on Ways and Relations, use <code>out geom</code> in your query:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="fu">query</span>(<span class="st">"""</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="st">    way[building](35.99,-78.91,36.00,-78.90);</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="st">    out geom;</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span>)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> <span class="fu">first</span>(<span class="fu">ways</span>(r))</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>w.geometry  <span class="co"># Vector{LatLon} with coordinates</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>To get full coordinate geometry on Ways and Relations, use <code>out geom</code> in your query (this is the default when using <code>OQL</code>):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> <span class="fu">query</span>(OQL.way[building <span class="op">=</span> <span class="st">"yes"</span>], bbox<span class="op">=</span>ext)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> <span class="fu">first</span>(<span class="fu">ways</span>(r))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>w.geometry  <span class="co"># Vector{LatLon} with coordinates</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Without <code>out geom</code>, Ways only contain node ID references (<code>node_ids</code>) and no coordinate data.</p>
 </section>
 <section id="geointerface-integration" class="level2">
@@ -488,31 +533,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong><code>Node</code></strong> and <strong><code>LatLon</code></strong> implement <code>PointTrait</code></li>
 <li><strong><code>Way</code></strong> implements <code>LineStringTrait</code> (when geometry is available)</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">GeoInterface</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> GI <span class="op">=</span> GeoInterface</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="fu">Node</span>(id<span class="op">=</span><span class="fl">1</span>, lat<span class="op">=</span><span class="fl">40.748</span>, lon<span class="op">=-</span><span class="fl">73.985</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>GI.<span class="fu">x</span>(n)  <span class="co"># -73.985 (longitude)</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>GI.<span class="fu">y</span>(n)  <span class="co"># 40.748  (latitude)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>This means OverpassAPI types work with any package that accepts GeoInterface geometries.</p>
-</section>
-<section id="overpass-ql-tips" class="level2">
-<h2 class="anchored" data-anchor-id="overpass-ql-tips">Overpass QL Tips</h2>
-<p><strong>Bounding box format</strong>: <code>(south, west, north, east)</code></p>
-<p><strong>Search by area name:</strong></p>
-<pre><code>area[name="Durham"]-&gt;.a;
-node[amenity=cafe](area.a);
-out;</code></pre>
-<p><strong>Union multiple types:</strong></p>
-<pre><code>(
-  node[amenity=restaurant](bbox);
-  way[amenity=restaurant](bbox);
-);
-out geom;</code></pre>
-<p><strong>Limit results:</strong></p>
-<pre><code>node[amenity=cafe](35.9,-79.1,36.1,-78.8);
-out 10;</code></pre>
-<p>See the <a href="https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL">Overpass QL documentation</a> for the full query language reference.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">GeoInterface</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> GI <span class="op">=</span> GeoInterface</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="fu">Node</span>(id<span class="op">=</span><span class="fl">1</span>, lat<span class="op">=</span><span class="fl">40.748</span>, lon<span class="op">=-</span><span class="fl">73.985</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>GI.<span class="fu">x</span>(n)  <span class="co"># -73.985 (longitude)</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>GI.<span class="fu">y</span>(n)  <span class="co"># 40.748  (latitude)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>Extents.extent</code> is implemented for <code>Node</code>, <code>LatLon</code>, and <code>Way</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Extents</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>Extents.<span class="fu">extent</span>(w)  <span class="co"># Extent(X=(-74.1, -73.9), Y=(40.0, 40.2))</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This means OverpassAPI types work with any package in the Julia geospatial ecosystem.</p>
 
 
 </section>
@@ -950,7 +980,7 @@ out 10;</code></pre>
       &nbsp;
     </div>   
     <div class="nav-footer-center">
-<p>Built on 2026-02-19</p>
+<p>Built on 2026-02-20</p>
 </div>
     <div class="nav-footer-right">
       &nbsp;
