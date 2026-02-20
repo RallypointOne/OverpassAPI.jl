@@ -413,31 +413,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#types" id="toc-types" class="nav-link active" data-scroll-target="#types">Types</a>
-  <ul>
-  <li><a href="#element" id="toc-element" class="nav-link" data-scroll-target="#element"><code>Element</code></a></li>
-  <li><a href="#latlon" id="toc-latlon" class="nav-link" data-scroll-target="#latlon"><code>LatLon</code></a></li>
-  <li><a href="#member" id="toc-member" class="nav-link" data-scroll-target="#member"><code>Member</code></a></li>
-  <li><a href="#node" id="toc-node" class="nav-link" data-scroll-target="#node"><code>Node</code></a></li>
-  <li><a href="#overpassresponse" id="toc-overpassresponse" class="nav-link" data-scroll-target="#overpassresponse"><code>OverpassResponse</code></a></li>
-  <li><a href="#qlstatement" id="toc-qlstatement" class="nav-link" data-scroll-target="#qlstatement"><code>QLStatement</code></a></li>
-  <li><a href="#relation" id="toc-relation" class="nav-link" data-scroll-target="#relation"><code>Relation</code></a></li>
-  <li><a href="#way" id="toc-way" class="nav-link" data-scroll-target="#way"><code>Way</code></a></li>
-  </ul></li>
-  <li><a href="#functions" id="toc-functions" class="nav-link" data-scroll-target="#functions">Functions</a>
-  <ul>
-  <li><a href="#bbox_string" id="toc-bbox_string" class="nav-link" data-scroll-target="#bbox_string"><code>bbox_string</code></a></li>
-  <li><a href="#nodes" id="toc-nodes" class="nav-link" data-scroll-target="#nodes"><code>nodes</code></a></li>
-  <li><a href="#overpass_ql" id="toc-overpass_ql" class="nav-link" data-scroll-target="#overpass_ql"><code>overpass_ql</code></a></li>
-  <li><a href="#query" id="toc-query" class="nav-link" data-scroll-target="#query"><code>query</code></a></li>
-  <li><a href="#relations" id="toc-relations" class="nav-link" data-scroll-target="#relations"><code>relations</code></a></li>
-  <li><a href="#ways" id="toc-ways" class="nav-link" data-scroll-target="#ways"><code>ways</code></a></li>
-  </ul></li>
-  <li><a href="#constants" id="toc-constants" class="nav-link" data-scroll-target="#constants">Constants</a>
-  <ul>
-  <li><a href="#default_endpoint" id="toc-default_endpoint" class="nav-link" data-scroll-target="#default_endpoint"><code>DEFAULT_ENDPOINT</code></a></li>
-  <li><a href="#oql" id="toc-oql" class="nav-link" data-scroll-target="#oql"><code>OQL</code></a></li>
-  </ul></li>
+  <li><a href="#types" id="toc-types" class="nav-link active" data-scroll-target="#types">Types</a></li>
+  <li><a href="#functions" id="toc-functions" class="nav-link" data-scroll-target="#functions">Functions</a></li>
+  <li><a href="#constants" id="toc-constants" class="nav-link" data-scroll-target="#constants">Constants</a></li>
   </ul>
 </nav>
     </div>
@@ -466,19 +444,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="types" class="level2">
 <h2 class="anchored" data-anchor-id="types">Types</h2>
-<section id="element" class="level4">
-<h4 class="anchored" data-anchor-id="element"><code>Element</code></h4>
 <div class="card mb-3">
+<section id="element" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="element"><code>Element</code></h4>
+</section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Element</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Abstract supertype for all OSM element types (<code>Node</code>, <code>Way</code>, <code>Relation</code>).</p>
 <p>All subtypes have <code>id::Int64</code> and <code>tags::Dict{String,String}</code> fields.</p>
 </div>
 </div>
-</section>
-<section id="latlon" class="level4">
-<h4 class="anchored"><code>LatLon</code></h4>
 <div class="card mb-3">
+<section id="latlon" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="latlon"><code>LatLon</code></h4>
+</section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">LatLon</span>(lat, lon)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>A lightweight latitude/longitude coordinate pair. Implements <code>GeoInterface.PointTrait</code>.</p>
@@ -495,10 +474,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 </div>
 </div>
-</section>
-<section id="member" class="level4">
-<h4 class="anchored"><code>Member</code></h4>
 <div class="card mb-3">
+<section id="member" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="member"><code>Member</code></h4>
+</section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Member</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>A member of an OSM relation.</p>
@@ -518,10 +497,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 </div>
 </div>
-</section>
-<section id="node" class="level4">
-<h4 class="anchored"><code>Node</code></h4>
 <div class="card mb-3">
+<section id="node" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="node"><code>Node</code></h4>
+</section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>Node <span class="op">&lt;:</span><span class="dt"> Element</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>An OpenStreetMap node (point feature). Implements <code>GeoInterface.PointTrait</code>.</p>
@@ -541,10 +520,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 </div>
 </div>
-</section>
-<section id="overpassresponse" class="level4">
-<h4 class="anchored"><code>OverpassResponse</code></h4>
 <div class="card mb-3">
+<section id="overpassresponse" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="overpassresponse"><code>OverpassResponse</code></h4>
+</section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>OverpassResponse</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The parsed response from an Overpass API query.</p>
@@ -567,10 +546,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 </div>
 </div>
-</section>
-<section id="qlstatement" class="level4">
-<h4 class="anchored"><code>QLStatement</code></h4>
 <div class="card mb-3">
+<section id="qlstatement" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="qlstatement"><code>QLStatement</code></h4>
+</section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>QLStatement</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>A composable Overpass QL statement built using <a href="@ref"><code>OQL</code></a> with dot and bracket syntax.</p>
@@ -585,10 +564,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 </div>
 </div>
-</section>
-<section id="relation" class="level4">
-<h4 class="anchored"><code>Relation</code></h4>
 <div class="card mb-3">
+<section id="relation" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="relation"><code>Relation</code></h4>
+</section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>Relation <span class="op">&lt;:</span><span class="dt"> Element</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>An OpenStreetMap relation (a group of elements with roles).</p>
@@ -607,10 +586,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 </div>
 </div>
-</section>
-<section id="way" class="level4">
-<h4 class="anchored"><code>Way</code></h4>
 <div class="card mb-3">
+<section id="way" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="way"><code>Way</code></h4>
+</section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>Way <span class="op">&lt;:</span><span class="dt"> Element</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>An OpenStreetMap way (line or polygon feature). Implements <code>GeoInterface.LineStringTrait</code> when geometry data is available (query uses <code>out geom</code>).</p>
@@ -631,12 +610,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-</section>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
-<section id="bbox_string" class="level4">
-<h4 class="anchored"><code>bbox_string</code></h4>
 <div class="card mb-3">
+<section id="bbox_string" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="bbox_string"><code>bbox_string</code></h4>
+</section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bbox_string</span>(ext<span class="op">::</span><span class="dt">Extent</span>) <span class="op">-&gt;</span> <span class="dt">String</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Convert an <code>Extents.Extent</code> to an Overpass bbox string <code>"(south,west,north,east)"</code>.</p>
@@ -647,19 +626,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 </div>
 </div>
-</section>
-<section id="nodes" class="level4">
-<h4 class="anchored" data-anchor-id="nodes"><code>nodes</code></h4>
 <div class="card mb-3">
+<section id="nodes" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="nodes"><code>nodes</code></h4>
+</section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nodes</span>(response<span class="op">::</span><span class="dt">OverpassResponse</span>) <span class="op">-&gt;</span> <span class="dt">Vector</span>{Node}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Return all <code>Node</code> elements from an <code>OverpassResponse</code>.</p>
 </div>
 </div>
-</section>
-<section id="overpass_ql" class="level4">
-<h4 class="anchored"><code>overpass_ql</code></h4>
 <div class="card mb-3">
+<section id="overpass_ql" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="overpass_ql"><code>overpass_ql</code></h4>
+</section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">overpass_ql</span>(s<span class="op">::</span><span class="dt">QLStatement</span>) <span class="op">-&gt;</span> <span class="dt">String</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Convert a <code>QLStatement</code> to its Overpass QL string representation.</p>
@@ -670,10 +649,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 </div>
 </div>
-</section>
-<section id="query" class="level4">
-<h4 class="anchored"><code>query</code></h4>
 <div class="card mb-3">
+<section id="query" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="query"><code>query</code></h4>
+</section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">query</span>(ql<span class="op">::</span><span class="dt">String</span>; bbox<span class="op">=</span><span class="cn">nothing</span>, endpoint<span class="op">=</span>DEFAULT_ENDPOINT) <span class="op">-&gt;</span> OverpassResponse</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Execute an Overpass QL query and return the parsed response.</p>
@@ -702,31 +681,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 </div>
 </div>
-</section>
-<section id="relations" class="level4">
-<h4 class="anchored" data-anchor-id="relations"><code>relations</code></h4>
 <div class="card mb-3">
+<section id="relations" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="relations"><code>relations</code></h4>
+</section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">relations</span>(response<span class="op">::</span><span class="dt">OverpassResponse</span>) <span class="op">-&gt;</span> <span class="dt">Vector</span>{Relation}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Return all <code>Relation</code> elements from an <code>OverpassResponse</code>.</p>
 </div>
 </div>
-</section>
-<section id="ways" class="level4">
-<h4 class="anchored" data-anchor-id="ways"><code>ways</code></h4>
 <div class="card mb-3">
+<section id="ways" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="ways"><code>ways</code></h4>
+</section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ways</span>(response<span class="op">::</span><span class="dt">OverpassResponse</span>) <span class="op">-&gt;</span> <span class="dt">Vector</span>{Way}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Return all <code>Way</code> elements from an <code>OverpassResponse</code>.</p>
 </div>
 </div>
 </section>
-</section>
 <section id="constants" class="level2">
 <h2 class="anchored" data-anchor-id="constants">Constants</h2>
-<section id="default_endpoint" class="level4">
-<h4 class="anchored" data-anchor-id="default_endpoint"><code>DEFAULT_ENDPOINT</code></h4>
 <div class="card mb-3">
+<section id="default_endpoint" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="default_endpoint"><code>DEFAULT_ENDPOINT</code></h4>
+</section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">String</span>(s<span class="op">::</span><span class="dt">AbstractString</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Create a new <code>String</code> from an existing <code>AbstractString</code>.</p>
@@ -739,10 +718,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>X509Name to string.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
-</section>
-<section id="oql" class="level4">
-<h4 class="anchored"><code>OQL</code></h4>
 <div class="card mb-3">
+<section id="oql" class="level4 card-header api-item-header">
+<h4 class="anchored" data-anchor-id="oql"><code>OQL</code></h4>
+</section>
 <div class="card-body">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>OQL</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Query builder for Overpass QL statements. Use dot syntax to select element types (<code>node</code>, <code>way</code>, <code>relation</code>, <code>rel</code>, <code>nwr</code>) and bracket syntax to add tag filters.</p>
@@ -761,7 +740,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->
