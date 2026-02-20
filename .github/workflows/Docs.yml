@@ -46,9 +46,8 @@ jobs:
       - uses: quarto-dev/quarto-actions/setup@v2
       - name: Set build date
         run: sed -i "s/__BUILD_DATE__/$(date -u +'%Y-%m-%d')/" docs/_quarto.yml
-      - uses: quarto-dev/quarto-actions/render@v2
-        with:
-          path: docs
+      - name: Render docs
+        run: quarto render docs || quarto render docs
 
       # Deploy to gh-pages branch
       - name: Deploy to gh-pages
