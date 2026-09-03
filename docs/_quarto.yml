@@ -2,7 +2,7 @@ project:
   type: book
   output-dir: _site
 
-engine: julia
+engines: ['julia']
 julia:
   project: "."
 
@@ -13,6 +13,8 @@ book:
     keyboard-shortcut:
       - "/"
   navbar:
+    logo: assets/logo.svg
+    logo-href: https://rallypoint1.com
     right:
       - icon: star
         href: https://github.com/RallypointOne/OverpassAPI.jl/stargazers
@@ -27,11 +29,11 @@ book:
         - overpass-ql.qmd
     - part: "API"
       chapters:
-        - api.qmd
+        - pages/api.qmd
     - part: "Reference"
       chapters:
         - changelog.qmd
-        - coverage.qmd
+        - pages/coverage.qmd
 
   page-footer:
     center: "Built on __BUILD_DATE__"
@@ -41,11 +43,10 @@ language:
 
 format:
   html:
-    css: styles.css
+    css: assets/styles.css
     number-sections: false
     theme:
-      light: flatly
-      dark: darkly
-    respect-user-color-scheme: true
+      - flatly
+      - assets/theme.scss
     include-after-body:
-      - file: _version-selector.html
+      - file: assets/_version-selector.html
