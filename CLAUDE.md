@@ -11,7 +11,6 @@
 
 - `api.qmd` must always be the last item before the "Reference" section in `_quarto.yml`
 - `api.qmd` lives in its own `part: "API"` to visually separate it from other doc pages
-- The API page uses open cards (not collapsible blocks) to display exports
 
 # Style
 
