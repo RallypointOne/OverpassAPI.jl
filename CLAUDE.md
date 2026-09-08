@@ -1,6 +1,7 @@
 # Development
 
 - Run tests: `julia --project -e 'using Pkg; Pkg.test()'`
+- Live tests against the public Overpass API (`test/test_service.jl`) are opt-in: `OVERPASS_LIVE_TESTS=true`. They run in CI only in the LiveTests workflow, on a single job.
 - Build docs: `quarto render docs`
 - `docs/` has its own Project.toml for doc-specific dependencies.
 - Each .qmd file in the docs should have `engine: julia` in the YAML frontmatter
