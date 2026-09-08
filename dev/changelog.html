@@ -212,6 +212,12 @@ ul.task-list li input[type="checkbox"] {
    
   <ul>
   <li><a href="#unreleased" id="toc-unreleased" class="nav-link active" data-scroll-target="#unreleased">Unreleased</a></li>
+  <li><a href="#v0.1.1-2026-09-08" id="toc-v0.1.1-2026-09-08" class="nav-link" data-scroll-target="#v0.1.1-2026-09-08">v0.1.1 (2026-09-08)</a>
+  <ul class="collapse">
+  <li><a href="#fixes" id="toc-fixes" class="nav-link" data-scroll-target="#fixes">Fixes</a></li>
+  <li><a href="#tests-ci" id="toc-tests-ci" class="nav-link" data-scroll-target="#tests-ci">Tests / CI</a></li>
+  <li><a href="#dependencies" id="toc-dependencies" class="nav-link" data-scroll-target="#dependencies">Dependencies</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -239,8 +245,34 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="unreleased" class="level2">
 <h2 class="anchored" data-anchor-id="unreleased">Unreleased</h2>
+</section>
+<section id="v0.1.1-2026-09-08" class="level2">
+<h2 class="anchored" data-anchor-id="v0.1.1-2026-09-08">v0.1.1 (2026-09-08)</h2>
+<section id="fixes" class="level3">
+<h3 class="anchored" data-anchor-id="fixes">Fixes</h3>
+<ul>
+<li><code>query</code> merges <code>[out:json]</code> and the <code>bbox</code> keyword into an existing settings statement instead of emitting a second one, which Overpass rejects.</li>
+<li><code>query</code> sends a URL-encoded form body instead of multipart, which the Overpass server rejected with HTTP 400.</li>
+<li>Requests now send a <code>User-Agent</code> header identifying the package.</li>
+<li><code>query(::QLStatement)</code> docstring no longer lists <code>out=:count</code>.</li>
+</ul>
+</section>
+<section id="tests-ci" class="level3">
+<h3 class="anchored" data-anchor-id="tests-ci">Tests / CI</h3>
+<ul>
+<li>Added an opt-in live-service test suite (<code>test/test_service.jl</code>), enabled via <code>OVERPASS_LIVE_TESTS=true</code> with an optional <code>OVERPASS_ENDPOINT</code> mirror override, plus a <code>LiveTests</code> workflow.</li>
+<li>Synced with <code>JuliaPackageTemplate</code>: docs moved to an <code>assets/</code> + <code>pages/</code> layout, Docs workflows updated, <code>TagBot.yml</code> permissions block dropped to match the template.</li>
+<li>Bumped GitHub Actions: <code>actions/checkout</code> to v7, <code>julia-actions/setup-julia</code> to v3, <code>actions/cache</code> to v3; added a Dependabot auto-merge workflow.</li>
+</ul>
+</section>
+<section id="dependencies" class="level3">
+<h3 class="anchored" data-anchor-id="dependencies">Dependencies</h3>
+<ul>
+<li>Widened the <code>HTTP</code> compat bound to allow <code>2.0</code>.</li>
+</ul>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

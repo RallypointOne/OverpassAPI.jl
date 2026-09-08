@@ -317,5 +317,16 @@
       "Reference",
       "<span class='chapter-number'>5</span>  <span class='chapter-title'>Changelog</span>"
     ]
+  },
+  {
+    "objectID": "changelog.html#v0.1.1-2026-09-08",
+    "href": "changelog.html#v0.1.1-2026-09-08",
+    "title": "Changelog",
+    "section": "v0.1.1 (2026-09-08)",
+    "text": "v0.1.1 (2026-09-08)\n\nFixes\n\nquery merges [out:json] and the bbox keyword into an existing settings statement instead of emitting a second one, which Overpass rejects.\nquery sends a URL-encoded form body instead of multipart, which the Overpass server rejected with HTTP 400.\nRequests now send a User-Agent header identifying the package.\nquery(::QLStatement) docstring no longer lists out=:count.\n\n\n\nTests / CI\n\nAdded an opt-in live-service test suite (test/test_service.jl), enabled via OVERPASS_LIVE_TESTS=true with an optional OVERPASS_ENDPOINT mirror override, plus a LiveTests workflow.\nSynced with JuliaPackageTemplate: docs moved to an assets/ + pages/ layout, Docs workflows updated, TagBot.yml permissions block dropped to match the template.\nBumped GitHub Actions: actions/checkout to v7, julia-actions/setup-julia to v3, actions/cache to v3; added a Dependabot auto-merge workflow.\n\n\n\nDependencies\n\nWidened the HTTP compat bound to allow 2.0.",
+    "crumbs": [
+      "Reference",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Changelog</span>"
+    ]
   }
 ]
