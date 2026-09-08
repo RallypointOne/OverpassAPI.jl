@@ -20,6 +20,8 @@ The default Overpass API endpoint: `"https://overpass-api.de/api/interpreter"`.
 """
 const DEFAULT_ENDPOINT = "https://overpass-api.de/api/interpreter"
 
+const USER_AGENT = "OverpassAPI.jl (+https://github.com/RallypointOne/OverpassAPI.jl)"
+
 #--------------------------------------------------------------------------------# Types
 
 """
@@ -409,13 +411,24 @@ julia> r = query("node[amenity=cafe](35.9,-79.1,36.1,-78.8); out geom;")
 ```
 """
 function query(ql::String; bbox::Union{Extent, Nothing}=nothing, endpoint::String=DEFAULT_ENDPOINT)
-    q = contains(ql, "[out:json]") ? ql : "[out:json];" * ql
-    if !isnothing(bbox)
-        x = bbox.X
-        y = bbox.Y
-        q = "[bbox:$(y[1]),$(x[1]),$(y[2]),$(x[2])];" * q
+    # Overpass allows one settings statement, so `[out:json]` and the bbox are
+    # merged into the query's own leading `[...]` block when it has one.
+    bbox_setting = isnothing(bbox) ? "" :
+        "[bbox:$(bbox.Y[1]),$(bbox.X[1]),$(bbox.Y[2]),$(bbox.X[2])]"
+    body = lstrip(ql)
+    if startswith(body, "[")
+        k = findfirst(';', body)
+        isnothing(k) && error("settings statement without a terminating ';' in query: $ql")
+        head, rest = body[1:prevind(body, k)], body[k:end]
+        contains(head, "[out:") || (head = "[out:json]" * head)
+        q = head * bbox_setting * rest
+    else
+        q = "[out:json]" * bbox_setting * ";" * body
     end
-    resp = HTTP.post(endpoint, [], HTTP.Form(Dict("data" => q)))
+    # Overpass expects a URL-encoded form body; it rejects multipart/form-data with HTTP 400.
+    # The public instances ask clients to identify themselves via User-Agent.
+    headers = ["Content-Type" => "application/x-www-form-urlencoded", "User-Agent" => USER_AGENT]
+    resp = HTTP.post(endpoint, headers, "data=" * HTTP.escapeuri(q); status_exception = false)
     if resp.status != 200
         error("Overpass API error (HTTP $(resp.status)): $(String(resp.body))")
     end
@@ -429,7 +442,7 @@ end
 Execute a [`QLStatement`](@ref) built with [`OQL`](@ref).
 
 The `out` keyword controls the output verbosity/geometry (default `:geom`).
-Accepts a `Symbol` (e.g. `:geom`, `:body`, `:center`, `:count`) or a `String`
+Accepts a `Symbol` (e.g. `:geom`, `:body`, `:center`, `:skel`) or a `String`
 for full control (e.g. `"body qt 100"`).
 
 ### Examples

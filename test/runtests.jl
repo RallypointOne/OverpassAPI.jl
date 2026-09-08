@@ -352,4 +352,6 @@ const MIXED_JSON = JSON3.read("""
         @test contains(repr(Relation(id=1)), "Relation(1")
         @test contains(repr(parse_response(MIXED_JSON)), "OverpassResponse")
     end
+
+    get(ENV, "OVERPASS_LIVE_TESTS", "false") == "true" && include("test_service.jl")
 end
